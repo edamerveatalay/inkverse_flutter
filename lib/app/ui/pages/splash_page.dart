@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:async';
+
+import 'package:inkverse_flutter/main.dart'; // AppPages.LOGIN burada tanımlı olmalı
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -10,8 +13,6 @@ class SplashPage extends StatefulWidget {
 
 class SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
-  bool _visible = true;
-
   late AnimationController animationController;
   late Animation<double> animation;
 
@@ -19,6 +20,7 @@ class SplashPageState extends State<SplashPage>
   void initState() {
     super.initState();
 
+    // Animasyon ayarları
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -29,25 +31,18 @@ class SplashPageState extends State<SplashPage>
       curve: Curves.easeOut,
     );
 
-    animation.addListener(() => setState(() {}));
-    animationController.forward();
-
-    setState(() {
-      _visible = !_visible;
+    animation.addListener(() {
+      setState(() {}); // animasyonu tetiklemek için
     });
 
-    startTime();
-  }
+    animationController.forward();
 
-  startTime() async {
-    var _duration = const Duration(seconds: 3);
-    return Timer(_duration, navigationPage);
+    // Splash süresi
+    Timer(const Duration(seconds: 3), navigationPage);
   }
 
   void navigationPage() {
-    Navigator.of(
-      context,
-    ).pushReplacementNamed('/signin'); // kendi login route'un
+    Get.offNamed(AppPages.LOGIN); // login sayfasına geç
   }
 
   @override
@@ -56,23 +51,17 @@ class SplashPageState extends State<SplashPage>
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              // Eğer resmi eklemediysen burayı geçebilirsin veya placeholder kullanabilirsin
-            ],
-          ),
+          // Arka plan rengi
+          Container(color: Colors.white),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // Logo resmi yoksa buraya placeholder Container koyabilirsin
-              Container(
-                width: animation.value * 200,
+              SizedBox(
+                width: animation.value * 200, // animasyonlu boyut
                 height: animation.value * 200,
-                color: Colors.orange.shade200,
-                child: const Center(
-                  child: Text('Logo', style: TextStyle(color: Colors.white)),
+                child: Image.asset(
+                  'assets/images/inkverse_logo_2.png', // burası logon
+                  fit: BoxFit.contain,
                 ),
               ),
             ],

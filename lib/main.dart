@@ -1,13 +1,11 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-// Aşağıdaki dosyaları daha sonra oluşturacağız.
-// import 'app/theme/app_theme.dart';
-// import 'app/routes/app_pages.dart';
+import 'app/ui/pages/splash_page.dart';
+import 'app/ui/pages/login_page.dart';
+import 'app/ui/pages/signup_page.dart';
 
-// Eğer henüz AppTheme / AppPages oluşturmadıysan geçici placeholder kullan:
 class AppTheme {
   static final ThemeData lightTheme = ThemeData(
     primaryColor: Colors.deepPurple,
@@ -18,12 +16,19 @@ class AppTheme {
 
 class AppPages {
   static const SPLASH = '/';
-  static final routes = <GetPage>[];
+  static const LOGIN = '/login';
+  static const SIGNUP = '/signup';
+
+  static final routes = <GetPage>[
+    GetPage(name: SPLASH, page: () => const SplashPage()),
+    GetPage(name: LOGIN, page: () => const LoginPage()),
+    GetPage(name: SIGNUP, page: () => const SignUpPage()),
+  ];
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await GetStorage.init(); // local storage (token vb.) için
+  await GetStorage.init();
   runApp(const InkverseApp());
 }
 
