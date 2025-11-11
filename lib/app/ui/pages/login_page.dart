@@ -134,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Row(
         children: <Widget>[
           Text(
-            "Welcome",
+            "Hoşgeldiniz",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: _large ? 60 : (_medium ? 50 : 40),
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Row(
         children: <Widget>[
           Text(
-            "Sign in to your account",
+            "Hesabınıza giriş yapın",
             style: TextStyle(
               fontWeight: FontWeight.w200,
               fontSize: _large ? 20 : (_medium ? 17.5 : 15),
@@ -177,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.emailAddress,
               textEditingController: emailController,
               icon: Icons.email,
-              hint: "Email ID",
+              hint: "Email",
             ),
             SizedBox(height: _height / 40.0),
             CustomTextField(
@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
               textEditingController: passwordController,
               icon: Icons.lock,
               obscureText: true,
-              hint: "Password",
+              hint: "Şifre",
             ),
           ],
         ),
@@ -200,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
-            "Forgot your password?",
+            "Şifrenizi mi unuttunuz?",
             style: TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: _large ? 14 : (_medium ? 12 : 10),
@@ -212,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // TODO: Şifre yenileme sayfasına yönlendirme
             },
             child: Text(
-              "Recover",
+              "Şifre yenileme",
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: Colors.orange.shade200,
@@ -246,9 +246,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         padding: const EdgeInsets.all(12.0),
         child: Text(
-          'SIGN IN',
+          'GİRİŞ YAP',
           style: TextStyle(
-            fontSize: _large ? 14 : (_medium ? 12 : 10),
+            fontSize: _large ? 14 : (_medium ? 15 : 10),
             color: Colors.white,
           ),
         ),
@@ -263,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
-            "Don't have an account?",
+            "Hesabınız yok mu?",
             style: TextStyle(
               fontWeight: FontWeight.w400,
               fontSize: _large ? 14 : (_medium ? 12 : 10),
@@ -275,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Navigator.of(context).pushNamed(SIGN_UP);
             },
             child: Text(
-              "Sign up",
+              "Kayıt ol",
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 color: Colors.orange.shade200,

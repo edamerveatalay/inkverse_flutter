@@ -84,6 +84,13 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget profileImage() {
+    return Stack(
+      children: <Widget>[
         Container(
           height: _height / 5.5,
           alignment: Alignment.center,
@@ -135,7 +142,7 @@ class _SignUpPageState extends State<SignUpPage> {
               keyboardType: TextInputType.text,
               obscureText: true,
               icon: Icons.lock,
-              hint: "Password",
+              hint: "Şifre",
               textEditingController: _passwordController,
             ),
           ],
@@ -158,7 +165,7 @@ class _SignUpPageState extends State<SignUpPage> {
           },
         ),
         Text(
-          "I accept all terms and conditions",
+          "Tüm hüküm ve koşulları kabul ediyorum",
           style: TextStyle(
             fontWeight: FontWeight.w400,
             fontSize: _large ? 12 : (_medium ? 11 : 10),
@@ -180,7 +187,7 @@ class _SignUpPageState extends State<SignUpPage> {
       onPressed: () {
         print("Routing to your account");
       },
-      child: const Text("SIGN UP", style: TextStyle(color: Colors.white)),
+      child: const Text("KAYIT OL", style: TextStyle(color: Colors.white)),
     );
   }
 
@@ -188,7 +195,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return Padding(
       padding: EdgeInsets.only(top: _height / 40.0),
       child: Text(
-        "Or create using social media",
+        "Veya sosyal medya ile kayıt ol",
         style: TextStyle(
           fontWeight: FontWeight.w400,
           fontSize: _large ? 12 : (_medium ? 11 : 10),
