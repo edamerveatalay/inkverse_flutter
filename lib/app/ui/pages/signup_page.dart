@@ -13,10 +13,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool checkBoxValue = false;
@@ -128,31 +125,10 @@ class _SignUpPageState extends State<SignUpPage> {
         child: Column(
           children: <Widget>[
             CustomTextField(
-              keyboardType: TextInputType.text,
-              icon: Icons.person,
-              hint: "First Name",
-              textEditingController: _firstNameController,
-            ),
-            SizedBox(height: _height / 60.0),
-            CustomTextField(
-              keyboardType: TextInputType.text,
-              icon: Icons.person,
-              hint: "Last Name",
-              textEditingController: _lastNameController,
-            ),
-            SizedBox(height: _height / 60.0),
-            CustomTextField(
               keyboardType: TextInputType.emailAddress,
               icon: Icons.email,
               hint: "Email",
               textEditingController: _emailController,
-            ),
-            SizedBox(height: _height / 60.0),
-            CustomTextField(
-              keyboardType: TextInputType.phone,
-              icon: Icons.phone,
-              hint: "Mobile Number",
-              textEditingController: _mobileController,
             ),
             SizedBox(height: _height / 60.0),
             CustomTextField(
