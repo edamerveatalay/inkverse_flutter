@@ -97,17 +97,31 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-        Container(
-          alignment: Alignment.bottomCenter,
-          margin: EdgeInsets.only(
-            top: _large
-                ? _height / 30
-                : (_medium ? _height / 25 : _height / 20),
-          ),
-          child: Image.asset(
-            'assets/images/login.png',
-            height: _height / 3.5,
-            width: _width / 3.5,
+        Padding(
+          padding: const EdgeInsets.only(
+            top: 50.0,
+          ), // Yukarı taşımak için. Yukarıyla boşlul bırakır
+          child: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30), // Köşeleri yuvarlatır
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Image.asset(
+                  'assets/images/inkverse_logom.png',
+                  height: 110, // istersen burayı büyütüp küçültebilirsin
+                  width: 110,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
           ),
         ),
       ],
