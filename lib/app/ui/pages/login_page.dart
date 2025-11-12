@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inkverse_flutter/app/ui/widgets/custom_shape.dart';
 import 'package:inkverse_flutter/app/ui/widgets/responsive_ui.dart';
 import 'package:inkverse_flutter/app/ui/widgets/text_form_field.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -230,11 +233,19 @@ class _LoginScreenState extends State<LoginScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         padding: EdgeInsets.zero,
       ),
-      onPressed: () {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login Successful')));
+      onPressed: () async {
+        // Burada login API çağrısı yapılacak (AuthApi.login)
+        // Örnek: login başarılıysa
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(
+          'token',
+          'kullanici_tokeni',
+        ); // backend'den gelen gerçek token burada olmalı
+
+        // Başarılı login sonrası ana sayfaya yönlendirme
+        Get.offAllNamed(HOME_PAGE);
       },
+
       child: Container(
         alignment: Alignment.center,
         width: _large ? _width / 4 : (_medium ? _width / 3.75 : _width / 3.5),

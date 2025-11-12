@@ -232,6 +232,7 @@ class _SignUpPageState extends State<SignUpPage> {
             response.data['message'] ?? 'Kayıt başarılı!',
             snackPosition: SnackPosition.BOTTOM,
           );
+          Get.offAllNamed('/home');
         } on DioError catch (e) {
           print('Dio Hata: ${e.message}');
           print(

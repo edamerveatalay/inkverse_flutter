@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:async';
-
-import 'package:inkverse_flutter/main.dart'; // AppPages.LOGIN burada tanımlı olmalı
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/main.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -13,36 +14,40 @@ class SplashPage extends StatefulWidget {
 
 class SplashPageState extends State<SplashPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController animationController;
-  late Animation<double> animation;
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
 
-    // Animasyon ayarları
-    animationController = AnimationController(
+    _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
 
-    animation = CurvedAnimation(
-      parent: animationController,
-      curve: Curves.easeOut,
-    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut)
+      ..addListener(() {
+        setState(() {});
+      });
 
-    animation.addListener(() {
-      setState(() {}); // animasyonu tetiklemek için
-    });
+    _controller.forward();
 
-    animationController.forward();
-
-    // Splash süresi
-    Timer(const Duration(seconds: 3), navigationPage);
+    // Splash bitince login durumunu kontrol et
+    Timer(const Duration(seconds: 3), _checkLoginStatus);
   }
 
-  void navigationPage() {
-    Get.offNamed(AppPages.LOGIN); // login sayfasına geç
+  /// Kullanıcının giriş yapıp yapmadığını kontrol eder
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    // Token varsa home’a, yoksa login’e yönlendir
+    if (token != null && token.isNotEmpty) {
+      Get.offAllNamed(HOME_PAGE);
+    } else {
+      Get.offAllNamed(AppPages.LOGIN);
+    }
   }
 
   @override
@@ -51,17 +56,25 @@ class SplashPageState extends State<SplashPage>
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          // Arka plan rengi
           Container(color: Colors.white),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               SizedBox(
-                width: animation.value * 200, // animasyonlu boyut
-                height: animation.value * 200,
+                width: _animation.value * 200,
+                height: _animation.value * 200,
                 child: Image.asset(
-                  'assets/images/inkverse_logo_2.png', // burası logon
+                  'assets/images/inkverse_logo_2.png',
                   fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Inkverse",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.pinkAccent,
                 ),
               ),
             ],
@@ -73,7 +86,7 @@ class SplashPageState extends State<SplashPage>
 
   @override
   void dispose() {
-    animationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 }
