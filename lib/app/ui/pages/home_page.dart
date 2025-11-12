@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/app/ui/pages/add_blog_page.dart';
 import 'package:inkverse_flutter/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -145,10 +146,16 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.orange.shade200,
         child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () {
-          Navigator.of(context).pushNamed(ADD_BLOG);
+        onPressed: () async {
+          final result = await Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const AddBlogPage()));
+          if (result == true) {
+            fetchBlogs(); // Listeyi güncelle
+          }
         },
       ),
+
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
