@@ -16,11 +16,15 @@ class AuthApi {
     }
   }
 
-  Future<Response> register(String password, String email) async {
+  Future<Response> register(
+    String username,
+    String email,
+    String password,
+  ) async {
     try {
       final response = await _apiClient.dio.post(
-        '/auth/register',
-        data: {'email': email, 'password': password},
+        '/auth/users',
+        data: {'username': username, 'email': email, 'password': password},
       );
       return response;
     } catch (e) {

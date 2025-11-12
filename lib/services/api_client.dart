@@ -10,7 +10,7 @@ class ApiClient {
   factory ApiClient() {
     // Burada Dio'u oluşturacağız ve interceptors ekleyeceğiz
     final baseOptions = BaseOptions(
-      baseUrl: 'http://127.0.0.1:8000', // senin backend adresin
+      baseUrl: 'http://10.0.2.2:8000', // senin backend adresin
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       responseType: ResponseType.json,

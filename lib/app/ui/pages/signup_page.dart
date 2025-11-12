@@ -1,9 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
 import 'package:inkverse_flutter/app/ui/widgets/custom_shape.dart';
 import 'package:inkverse_flutter/app/ui/widgets/custom_appbar.dart';
 import 'package:inkverse_flutter/app/ui/widgets/responsive_ui.dart';
 import 'package:inkverse_flutter/app/ui/widgets/text_form_field.dart';
+import 'package:inkverse_flutter/services/auth_api.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -44,7 +48,22 @@ class _SignUpPageState extends State<SignUpPage> {
             button(),
             infoTextRow(),
             socialIconsRow(),
+            SizedBox(height: _height / 35),
+            backendTestButton(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget infoTextRow() {
+    return Padding(
+      padding: EdgeInsets.only(top: _height / 40.0),
+      child: Text(
+        "Veya sosyal medya ile kayıt ol",
+        style: TextStyle(
+          fontWeight: FontWeight.w400,
+          fontSize: _large ? 12 : (_medium ? 11 : 10),
         ),
       ),
     );
@@ -192,23 +211,50 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
       ),
-      onPressed: () {
-        print("Routing to your account");
-      },
-      child: const Text("KAYIT OL", style: TextStyle(color: Colors.white)),
-    );
-  }
+      onPressed: () async {
+        if (!checkBoxValue) {
+          Get.snackbar(
+            'Hata',
+            'Lütfen hüküm ve koşulları kabul edin',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
 
-  Widget infoTextRow() {
-    return Padding(
-      padding: EdgeInsets.only(top: _height / 40.0),
-      child: Text(
-        "Veya sosyal medya ile kayıt ol",
-        style: TextStyle(
-          fontWeight: FontWeight.w400,
-          fontSize: _large ? 12 : (_medium ? 11 : 10),
-        ),
-      ),
+        final username = _usernameController.text.trim();
+        final email = _emailController.text.trim();
+        final password = _passwordController.text.trim();
+
+        try {
+          final response = await AuthApi().register(username, email, password);
+          Get.snackbar(
+            'Durum',
+            response.data['message'] ?? 'Kayıt başarılı!',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        } on DioError catch (e) {
+          print('Dio Hata: ${e.message}');
+          print(
+            'Backend Hata: ${e.response?.statusCode} -> ${e.response?.data}',
+          );
+          Get.snackbar(
+            'Hata',
+            e.response?.data['detail'] ?? e.message,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        } catch (e) {
+          print('Diğer Hata: $e');
+          Get.snackbar(
+            'Hata',
+            e.toString(),
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      },
+      child: const Text(
+        "KAYIT OL",
+        style: TextStyle(color: Colors.white),
+      ), // <- burada ;
     );
   }
 
@@ -231,6 +277,50 @@ class _SignUpPageState extends State<SignUpPage> {
           backgroundImage: AssetImage("assets/images/twitterlogo.jpg"),
         ),
       ],
+    );
+  }
+
+  Widget backendTestButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+      ),
+      onPressed: () async {
+        try {
+          final response = await Dio().get(
+            'http://10.0.2.2:8000/health',
+          ); // test endpoint
+          print('Başarılı: ${response.data}');
+          Get.snackbar(
+            'Başarılı',
+            response.data.toString(),
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        } on DioError catch (e) {
+          print('Dio Hata: ${e.message}');
+          if (e.response != null) {
+            print(
+              'Backend Hata: ${e.response?.statusCode} -> ${e.response?.data}',
+            );
+            Get.snackbar(
+              'Backend Hata',
+              '${e.response?.statusCode}: ${e.response?.data}',
+              snackPosition: SnackPosition.BOTTOM,
+            );
+          } else {
+            Get.snackbar(
+              'Network Hata',
+              e.message ?? 'Bilinmeyen bir hata oluştu',
+              snackPosition: SnackPosition.BOTTOM,
+            );
+          }
+        }
+      },
+      child: const Text("Backend Test", style: TextStyle(color: Colors.white)),
     );
   }
 }
