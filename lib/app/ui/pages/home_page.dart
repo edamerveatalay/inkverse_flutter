@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -50,7 +54,18 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('token');
+              Get.offAllNamed(AppPages.LOGIN); // login sayfasına yönlendir
+            },
+          ),
+        ],
       ),
+
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

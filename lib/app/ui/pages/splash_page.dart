@@ -69,14 +69,6 @@ class SplashPageState extends State<SplashPage>
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                "Inkverse",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.pinkAccent,
-                ),
-              ),
             ],
           ),
         ],
