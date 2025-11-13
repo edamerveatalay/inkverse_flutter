@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import '../../constants/constants.dart'; // BASE_URL, ADD_BLOG
+import 'package:get/get.dart';
+import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/services/api_client.dart';
 
 class AddBlogPage extends StatefulWidget {
   const AddBlogPage({super.key});
@@ -25,9 +26,10 @@ class _AddBlogPageState extends State<AddBlogPage> {
     setState(() => isLoading = true);
 
     try {
-      final dio = Dio(BaseOptions(baseUrl: BASE_URL));
+      final dio = ApiClient().dio;
+
       final response = await dio.post(
-        ADD_BLOG,
+        ADD_BLOG, // constants.dart’ta /blog/ olacak
         data: {
           "title": titleController.text,
           "content": contentController.text,
@@ -38,10 +40,7 @@ class _AddBlogPageState extends State<AddBlogPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Yazı başarıyla yayınlandı!")),
         );
-        Navigator.pop(
-          context,
-          true,
-        ); // Ana sayfaya geri dön ve listeyi güncelle
+        Navigator.pop(context, true); // geri dön ve listeyi yenile
       } else {
         ScaffoldMessenger.of(
           context,

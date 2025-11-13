@@ -7,7 +7,7 @@ class AuthApi {
   Future<Response> login(String email, String password) async {
     try {
       final response = await _apiClient.dio.post(
-        '/auth/login',
+        '/auth/signin/', // backend ile birebir eşleşiyor
         data: {'email': email, 'password': password},
       );
       return response;

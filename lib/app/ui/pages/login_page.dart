@@ -5,6 +5,7 @@ import 'package:inkverse_flutter/app/ui/widgets/custom_shape.dart';
 import 'package:inkverse_flutter/app/ui/widgets/responsive_ui.dart';
 import 'package:inkverse_flutter/app/ui/widgets/text_form_field.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/services/auth_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatelessWidget {
@@ -234,16 +235,41 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: EdgeInsets.zero,
       ),
       onPressed: () async {
-        // Burada login API çağrısı yapılacak (AuthApi.login)
-        // Örnek: login başarılıysa
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(
-          'token',
-          'kullanici_tokeni',
-        ); // backend'den gelen gerçek token burada olmalı
+        final authApi = AuthApi();
 
-        // Başarılı login sonrası ana sayfaya yönlendirme
-        Get.offAllNamed(HOME_PAGE);
+        try {
+          // 1️⃣ Backend’e login isteği gönder
+          final response = await authApi.login(
+            emailController.text.trim(),
+            passwordController.text.trim(),
+          );
+
+          // 2️⃣ Backend yanıtını kontrol et
+          if (response.statusCode == 200) {
+            final data = response.data;
+
+            // 3️⃣ Backend ‘access_token’ ya da ‘token’ olarak dönüyor olabilir
+            final token = data['access_token'] ?? data['token'];
+
+            if (token != null) {
+              // 4️⃣ Token'ı local'e kaydet
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('token', token);
+
+              print('TOKEN KAYDEDİLDİ: $token');
+
+              // 5️⃣ Ana sayfaya yönlendir
+              Get.offAllNamed(HOME_PAGE);
+            } else {
+              Get.snackbar('Hata', 'Token alınamadı');
+            }
+          } else {
+            Get.snackbar('Hata', 'Giriş başarısız');
+          }
+        } catch (e) {
+          print('Login Hatası: $e');
+          Get.snackbar('Hata', 'Sunucuya bağlanılamadı');
+        }
       },
 
       child: Container(

@@ -3,12 +3,12 @@
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
   final Dio dio;
   ApiClient._internal(this.dio);
   factory ApiClient() {
-    // Burada Dio'u oluşturacağız ve interceptors ekleyeceğiz
     final baseOptions = BaseOptions(
       baseUrl: 'http://10.0.2.2:8000', // senin backend adresin
       connectTimeout: const Duration(seconds: 10),
@@ -20,22 +20,21 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // GetStorage’dan token oku
-          final box = GetStorage();
-          final token = box.read('token');
+          final prefs = await SharedPreferences.getInstance();
+          final token = prefs.getString('token');
 
-          // Eğer token varsa header’a ekl
-          if (token != null) {
+          if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
 
-          // Debug log (opsiyonel)
           if (kDebugMode) {
             print('REQUEST[${options.method}] => PATH: ${options.path}');
+            print('TOKEN: $token');
           }
 
-          return handler.next(options); // isteği devam ettir
+          return handler.next(options);
         },
+
         onResponse: (response, handler) {
           if (kDebugMode) {
             print(
