@@ -125,6 +125,16 @@ class _DraftsPageState extends State<DraftsPage> {
                                       await SharedPreferences.getInstance();
                                   final token = prefs.getString('token');
 
+                                  // Kontrol etmek için:
+                                  print(
+                                    "Token değeri: $token",
+                                  ); // ← burayı ekle
+
+                                  if (token == null || token.isEmpty) {
+                                    print("Token bulunamadı, giriş yapın");
+                                    return;
+                                  }
+
                                   final dio = Dio(
                                     BaseOptions(baseUrl: BASE_URL),
                                   );

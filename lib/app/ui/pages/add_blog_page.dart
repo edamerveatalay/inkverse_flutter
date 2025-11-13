@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddBlogPage extends StatefulWidget {
   const AddBlogPage({super.key});
@@ -19,14 +20,23 @@ class _AddBlogPageState extends State<AddBlogPage> {
     setState(() => isLoading = true);
     try {
       final dio = Dio(BaseOptions(baseUrl: BASE_URL));
-      await dio.post(
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      final response = await dio.post(
         '/blog/',
         data: {
           'title': titleController.text,
           'content': contentController.text,
           'is_published': isPublished,
         },
+        options: Options(headers: {"Authorization": "Bearer $token"}),
       );
+
+      print(
+        "Taslak kaydetme response: ${response.statusCode} - ${response.data}",
+      );
+
       Get.back(result: true);
     } catch (e) {
       print("Hata: $e");
