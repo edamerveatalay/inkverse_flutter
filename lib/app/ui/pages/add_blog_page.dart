@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
-import 'package:inkverse_flutter/services/api_client.dart';
 
 class AddBlogPage extends StatefulWidget {
   const AddBlogPage({super.key});
@@ -11,45 +11,25 @@ class AddBlogPage extends StatefulWidget {
 }
 
 class _AddBlogPageState extends State<AddBlogPage> {
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController contentController = TextEditingController();
+  final titleController = TextEditingController();
+  final contentController = TextEditingController();
   bool isLoading = false;
 
-  Future<void> submitBlog() async {
-    if (titleController.text.isEmpty || contentController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Başlık ve içerik boş olamaz")),
-      );
-      return;
-    }
-
+  Future<void> _saveBlog(bool isPublished) async {
     setState(() => isLoading = true);
-
     try {
-      final dio = ApiClient().dio;
-
-      final response = await dio.post(
-        ADD_BLOG, // constants.dart’ta /blog/ olacak
+      final dio = Dio(BaseOptions(baseUrl: BASE_URL));
+      await dio.post(
+        '/blog/',
         data: {
-          "title": titleController.text,
-          "content": contentController.text,
+          'title': titleController.text,
+          'content': contentController.text,
+          'is_published': isPublished,
         },
       );
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Yazı başarıyla yayınlandı!")),
-        );
-        Navigator.pop(context, true); // geri dön ve listeyi yenile
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Hata: ${response.statusCode}")));
-      }
+      Get.back(result: true);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Hata: $e")));
+      print("Hata: $e");
     } finally {
       setState(() => isLoading = false);
     }
@@ -59,7 +39,8 @@ class _AddBlogPageState extends State<AddBlogPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Yeni Yazı"),
+        title: const Text("Yeni Blog Yaz"),
+        centerTitle: true,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -69,46 +50,58 @@ class _AddBlogPageState extends State<AddBlogPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(
-                labelText: "Başlık",
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: "Başlık"),
             ),
             const SizedBox(height: 16),
             Expanded(
               child: TextField(
                 controller: contentController,
+                decoration: const InputDecoration(labelText: "İçerik"),
                 maxLines: null,
                 expands: true,
-                textAlignVertical: TextAlignVertical.top,
-                decoration: const InputDecoration(
-                  labelText: "İçerik",
-                  border: OutlineInputBorder(),
-                ),
               ),
             ),
-            const SizedBox(height: 16),
-            isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: submitBlog,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: isLoading ? null : () => _saveBlog(false),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade400,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
                     ),
-                    child: const Text(
-                      "Yayınla",
-                      style: TextStyle(fontSize: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  child: const Text("Taslağı Kaydet"),
+                ),
+                ElevatedButton(
+                  onPressed: isLoading ? null : () => _saveBlog(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pinkAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text("Yayınla"),
+                ),
+              ],
+            ),
           ],
         ),
       ),

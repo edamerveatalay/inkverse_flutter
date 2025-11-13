@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
 import 'package:inkverse_flutter/app/ui/pages/add_blog_page.dart';
+import 'package:inkverse_flutter/app/ui/pages/draft_page.dart';
 import 'package:inkverse_flutter/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,7 +33,9 @@ class _HomePageState extends State<HomePage> {
       final response = await dio.get('/blogs/');
       if (response.statusCode == 200) {
         setState(() {
-          blogs = response.data;
+          blogs = response.data
+              .where((blog) => blog['is_published'] == true)
+              .toList();
           isLoading = false;
         });
       }
@@ -169,7 +172,14 @@ class _HomePageState extends State<HomePage> {
                 icon: const Icon(Icons.home, color: Colors.pinkAccent),
                 onPressed: () {},
               ),
-              const SizedBox(width: 40), // fab boşluğu
+              IconButton(
+                icon: const Icon(Icons.drafts_outlined, color: Colors.grey),
+                onPressed: () {
+                  Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => const DraftsPage()));
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.person_outline, color: Colors.grey),
                 onPressed: () {
@@ -180,7 +190,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
