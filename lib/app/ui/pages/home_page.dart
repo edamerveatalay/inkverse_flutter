@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
 import 'package:inkverse_flutter/app/ui/pages/add_blog_page.dart';
-import 'package:inkverse_flutter/app/ui/pages/draft_page.dart';
+import 'package:inkverse_flutter/app/ui/pages/drafts_page.dart';
 import 'package:inkverse_flutter/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

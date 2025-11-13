@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DraftsPage extends StatefulWidget {
   const DraftsPage({super.key});
@@ -21,8 +22,16 @@ class _DraftsPageState extends State<DraftsPage> {
 
   Future<void> fetchDrafts() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
       final dio = Dio(BaseOptions(baseUrl: BASE_URL));
-      final response = await dio.get('/blogs/?is_published=false');
+      final response = await dio.get(
+        '/blog/',
+        queryParameters: {"is_published": false},
+        options: Options(headers: {"Authorization": "Bearer $token"}),
+      );
+
       if (response.statusCode == 200) {
         setState(() {
           drafts = response.data;
@@ -112,18 +121,33 @@ class _DraftsPageState extends State<DraftsPage> {
                               ),
                               onPressed: () async {
                                 try {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  final token = prefs.getString('token');
+
                                   final dio = Dio(
                                     BaseOptions(baseUrl: BASE_URL),
                                   );
-                                  await dio.patch(
+                                  await dio.put(
                                     '/blog/${draft['id']}',
-                                    data: {'is_published': true},
+                                    data: {
+                                      'title': draft['title'],
+                                      'content': draft['content'],
+                                      'is_published': true,
+                                    },
+                                    options: Options(
+                                      headers: {
+                                        "Authorization": "Bearer $token",
+                                      },
+                                    ),
                                   );
-                                  fetchDrafts();
+
+                                  await fetchDrafts(); // sayfayı güncelle
                                 } catch (e) {
                                   print("Yayınlama hatası: $e");
                                 }
                               },
+
                               child: const Text("Yayınla"),
                             ),
                           ),
