@@ -1,5 +1,3 @@
-//Flutter uygulamamızın backend ile konuşmasını sağlayacak bir “iletim hattı” kuruyoruz.
-// backende mesaj yollayıcısıFlutter uygulamamızın backend ile konuşmasını sağlayacak bir “iletim hattı” kuruyoruz.
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -8,15 +6,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiClient {
   final Dio dio;
   ApiClient._internal(this.dio);
+
   factory ApiClient() {
     final baseOptions = BaseOptions(
-      baseUrl: 'http://10.0.2.2:8000', // senin backend adresin
+      baseUrl: 'http://10.0.2.2:8000',
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       responseType: ResponseType.json,
+      followRedirects: true, // ✅ BUNU EKLE - 307 HATASINI ÇÖZER
+      maxRedirects: 5, // ✅ BUNU EKLE
     );
 
     final dio = Dio(baseOptions);
+
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -41,7 +43,7 @@ class ApiClient {
               'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
             );
           }
-          return handler.next(response); // cevabı devam ettir
+          return handler.next(response);
         },
         onError: (DioError e, handler) {
           if (kDebugMode) {
@@ -49,10 +51,11 @@ class ApiClient {
               'ERROR[${e.response?.statusCode}] => PATH: ${e.requestOptions.path}',
             );
           }
-          return handler.next(e); // hatayı devam ettir
+          return handler.next(e);
         },
       ),
     );
+
     return ApiClient._internal(dio);
   }
 }

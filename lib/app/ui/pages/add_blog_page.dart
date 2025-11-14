@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:inkverse_flutter/services/blog_api.dart';
 
 class AddBlogPage extends StatefulWidget {
   const AddBlogPage({super.key});
@@ -15,31 +14,39 @@ class _AddBlogPageState extends State<AddBlogPage> {
   final titleController = TextEditingController();
   final contentController = TextEditingController();
   bool isLoading = false;
+  final BlogApi _blogApi = BlogApi();
 
   Future<void> _saveBlog(bool isPublished) async {
+    if (titleController.text.isEmpty || contentController.text.isEmpty) {
+      Get.snackbar('Hata', 'Başlık ve içerik boş olamaz');
+      return;
+    }
+
     setState(() => isLoading = true);
+
     try {
-      final dio = Dio(BaseOptions(baseUrl: BASE_URL));
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-
-      final response = await dio.post(
-        '/blog/',
-        data: {
-          'title': titleController.text,
-          'content': contentController.text,
-          'is_published': isPublished,
-        },
-        options: Options(headers: {"Authorization": "Bearer $token"}),
-      );
-
-      print(
-        "Taslak kaydetme response: ${response.statusCode} - ${response.data}",
-      );
+      if (isPublished) {
+        // Doğrudan yayınla
+        await _blogApi.createBlog(
+          title: titleController.text,
+          content: contentController.text,
+          isPublished: true,
+        );
+        Get.snackbar('Başarılı', 'Blog yayınlandı!');
+      } else {
+        // Taslak olarak kaydet
+        await _blogApi.createBlog(
+          title: titleController.text,
+          content: contentController.text,
+          isPublished: false,
+        );
+        Get.snackbar('Başarılı', 'Taslak kaydedildi!');
+      }
 
       Get.back(result: true);
     } catch (e) {
-      print("Hata: $e");
+      print("Blog kaydetme hatası: $e");
+      Get.snackbar('Hata', 'Blog kaydedilemedi: $e');
     } finally {
       setState(() => isLoading = false);
     }
@@ -65,15 +72,23 @@ class _AddBlogPageState extends State<AddBlogPage> {
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: "Başlık"),
+              decoration: const InputDecoration(
+                labelText: "Başlık",
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(
               child: TextField(
                 controller: contentController,
-                decoration: const InputDecoration(labelText: "İçerik"),
+                decoration: const InputDecoration(
+                  labelText: "İçerik",
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
                 maxLines: null,
                 expands: true,
+                textAlignVertical: TextAlignVertical.top,
               ),
             ),
             const SizedBox(height: 20),
@@ -93,7 +108,13 @@ class _AddBlogPageState extends State<AddBlogPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text("Taslağı Kaydet"),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text("Taslağı Kaydet"),
                 ),
                 ElevatedButton(
                   onPressed: isLoading ? null : () => _saveBlog(true),
@@ -108,7 +129,13 @@ class _AddBlogPageState extends State<AddBlogPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text("Yayınla"),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text("Yayınla"),
                 ),
               ],
             ),

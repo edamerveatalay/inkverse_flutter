@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/services/blog_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DraftsPage extends StatefulWidget {
@@ -13,6 +15,7 @@ class DraftsPage extends StatefulWidget {
 class _DraftsPageState extends State<DraftsPage> {
   List<dynamic> drafts = [];
   bool isLoading = true;
+  final BlogApi _blogApi = BlogApi();
 
   @override
   void initState() {
@@ -22,25 +25,49 @@ class _DraftsPageState extends State<DraftsPage> {
 
   Future<void> fetchDrafts() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
+      // BlogApi servisini kullan
+      final response = await _blogApi.getBlogs(isPublished: false);
 
-      final dio = Dio(BaseOptions(baseUrl: BASE_URL));
-      final response = await dio.get(
-        '/blog/',
-        queryParameters: {"is_published": false},
-        options: Options(headers: {"Authorization": "Bearer $token"}),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          drafts = response.data;
-          isLoading = false;
-        });
-      }
+      setState(() {
+        drafts = response;
+        isLoading = false;
+      });
     } catch (e) {
       print("Taslaklar alınırken hata: $e");
       setState(() => isLoading = false);
+      Get.snackbar('Hata', 'Taslaklar yüklenemedi');
+    }
+  }
+
+  Future<void> _publishDraft(dynamic draft) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      // YENİ: Doğrudan Dio ile redirect ayarları
+      final dio = Dio(
+        BaseOptions(baseUrl: BASE_URL, followRedirects: true, maxRedirects: 5),
+      );
+
+      print("🔄 Yayınlanıyor: ${draft.id} - ${draft.title}");
+
+      final response = await dio.put(
+        '/blog/${draft.id}',
+        data: {
+          'title': draft.title,
+          'content': draft.content,
+          'is_published': true,
+        },
+        options: Options(headers: {"Authorization": "Bearer $token"}),
+      );
+
+      print("✅ Yayınlama başarılı: ${response.statusCode}");
+
+      Get.snackbar('Başarılı', 'Blog yayınlandı!');
+      await fetchDrafts(); // Listeyi güncelle
+    } catch (e) {
+      print("❌ Yayınlama hatası: $e");
+      Get.snackbar('Hata', 'Yayınlama başarısız: $e');
     }
   }
 
@@ -92,7 +119,7 @@ class _DraftsPageState extends State<DraftsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            draft['title'] ?? 'Başlık Yok',
+                            draft.title ?? 'Başlık Yok',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -100,7 +127,7 @@ class _DraftsPageState extends State<DraftsPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            draft['content'] ?? '',
+                            draft.content ?? '',
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -119,45 +146,7 @@ class _DraftsPageState extends State<DraftsPage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              onPressed: () async {
-                                try {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  final token = prefs.getString('token');
-
-                                  // Kontrol etmek için:
-                                  print(
-                                    "Token değeri: $token",
-                                  ); // ← burayı ekle
-
-                                  if (token == null || token.isEmpty) {
-                                    print("Token bulunamadı, giriş yapın");
-                                    return;
-                                  }
-
-                                  final dio = Dio(
-                                    BaseOptions(baseUrl: BASE_URL),
-                                  );
-                                  await dio.put(
-                                    '/blog/${draft['id']}',
-                                    data: {
-                                      'title': draft['title'],
-                                      'content': draft['content'],
-                                      'is_published': true,
-                                    },
-                                    options: Options(
-                                      headers: {
-                                        "Authorization": "Bearer $token",
-                                      },
-                                    ),
-                                  );
-
-                                  await fetchDrafts(); // sayfayı güncelle
-                                } catch (e) {
-                                  print("Yayınlama hatası: $e");
-                                }
-                              },
-
+                              onPressed: () => _publishDraft(draft),
                               child: const Text("Yayınla"),
                             ),
                           ),
