@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/app/routers/app_pages.dart' as app_pages;
 import 'package:inkverse_flutter/services/blog_api.dart';
 
 class AddBlogPage extends StatefulWidget {
@@ -25,25 +25,20 @@ class _AddBlogPageState extends State<AddBlogPage> {
     setState(() => isLoading = true);
 
     try {
-      if (isPublished) {
-        // Doğrudan yayınla
-        await _blogApi.createBlog(
-          title: titleController.text,
-          content: contentController.text,
-          isPublished: true,
-        );
-        Get.snackbar('Başarılı', 'Blog yayınlandı!');
-      } else {
-        // Taslak olarak kaydet
-        await _blogApi.createBlog(
-          title: titleController.text,
-          content: contentController.text,
-          isPublished: false,
-        );
-        Get.snackbar('Başarılı', 'Taslak kaydedildi!');
-      }
+      // Blog kaydetme
+      await _blogApi.createBlog(
+        title: titleController.text,
+        content: contentController.text,
+        isPublished: isPublished,
+      );
 
-      Get.back(result: true);
+      Get.snackbar(
+        'Başarılı',
+        isPublished ? 'Blog yayınlandı!' : 'Taslak kaydedildi!',
+      );
+
+      // Ana sayfaya yönlendir
+      Get.offAllNamed(app_pages.AppPages.HOME);
     } catch (e) {
       print("Blog kaydetme hatası: $e");
       Get.snackbar('Hata', 'Blog kaydedilemedi: $e');

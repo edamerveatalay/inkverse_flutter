@@ -81,12 +81,7 @@ class _HomePageState extends State<HomePage> {
                         final blog = blogs[index];
                         return GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => BlogDetailPage(blog: blog),
-                              ),
-                            );
+                            Get.to(() => BlogDetailPage(blog: blog));
                           },
                           child: Card(
                             elevation: 5,
@@ -151,14 +146,13 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.orange.shade200,
         child: const Icon(Icons.add, color: Colors.white),
         onPressed: () async {
-          final result = await Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => const AddBlogPage()));
+          final result = await Get.to(() => const AddBlogPage());
           if (result == true) {
-            await fetchBlogs(); // ✅ yeni blog eklendiğinde listeyi yenile
+            await fetchBlogs(); // yeni blog eklendiğinde listeyi yenile
           }
         },
       ),
+
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
@@ -175,15 +169,13 @@ class _HomePageState extends State<HomePage> {
               IconButton(
                 icon: const Icon(Icons.drafts_outlined, color: Colors.grey),
                 onPressed: () {
-                  Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (_) => const DraftsPage()));
+                  Get.to(() => const DraftsPage());
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.person_outline, color: Colors.grey),
                 onPressed: () {
-                  Navigator.of(context).pushNamed(PROFILE);
+                  Get.toNamed(PROFILE);
                 },
               ),
             ],
