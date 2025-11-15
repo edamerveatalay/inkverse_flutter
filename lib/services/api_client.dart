@@ -13,8 +13,8 @@ class ApiClient {
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       responseType: ResponseType.json,
-      followRedirects: true, // ✅ BUNU EKLE - 307 HATASINI ÇÖZER
-      maxRedirects: 5, // ✅ BUNU EKLE
+      followRedirects: true,
+      maxRedirects: 5,
     );
 
     final dio = Dio(baseOptions);
