@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/app/ui/pages/drafts_edit_page.dart';
 import 'package:inkverse_flutter/services/blog_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -132,23 +133,47 @@ class _DraftsPageState extends State<DraftsPage> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.pinkAccent,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blueAccent,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                                onPressed: () {
+                                  Get.to(
+                                    () => DraftEditPage(draft: draft),
+                                  )?.then((_) => fetchDrafts());
+                                },
+                                child: const Text("Düzenle"),
                               ),
-                              onPressed: () => _publishDraft(draft),
-                              child: const Text("Yayınla"),
-                            ),
+
+                              const SizedBox(width: 10),
+
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.pinkAccent,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: () => _publishDraft(draft),
+                                child: const Text("Yayınla"),
+                              ),
+                            ],
                           ),
                         ],
                       ),
