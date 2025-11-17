@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inkverse_flutter/app/routers/app_pages.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
@@ -44,7 +45,7 @@ class SplashPageState extends State<SplashPage>
 
     // Token varsa home’a, yoksa login’e yönlendir
     if (token != null && token.isNotEmpty) {
-      Get.offAllNamed(HOME_PAGE);
+      Get.offAllNamed(AppPages.HOME);
     } else {
       Get.offAllNamed(AppPages.LOGIN);
     }

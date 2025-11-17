@@ -149,9 +149,7 @@ class _DraftsPageState extends State<DraftsPage> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  Get.to(
-                                    () => DraftEditPage(draft: draft),
-                                  )?.then((_) => fetchDrafts());
+                                  Get.toNamed('/drafts-edit', arguments: draft);
                                 },
                                 child: const Text("Düzenle"),
                               ),

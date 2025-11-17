@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inkverse_flutter/app/routers/app_pages.dart' as app_pages;
 import 'package:inkverse_flutter/services/blog_api.dart';
 import 'package:inkverse_flutter/app/models/blog.dart';
+import 'package:inkverse_flutter/app/ui/pages/drafts_page.dart';
 
-class DraftEditPage extends StatefulWidget {
+class DraftsEditPage extends StatefulWidget {
   final Blog draft;
-
-  const DraftEditPage({super.key, required this.draft});
+  const DraftsEditPage({super.key, required this.draft});
 
   @override
-  State<DraftEditPage> createState() => _DraftEditPageState();
+  State<DraftsEditPage> createState() => _DraftsEditPageState();
 }
 
-class _DraftEditPageState extends State<DraftEditPage> {
+class _DraftsEditPageState extends State<DraftsEditPage> {
   final BlogApi _blogApi = BlogApi();
-
   late TextEditingController titleController;
   late TextEditingController contentController;
-
   bool isLoading = false;
 
   @override
@@ -27,9 +26,20 @@ class _DraftEditPageState extends State<DraftEditPage> {
     contentController = TextEditingController(text: widget.draft.content);
   }
 
-  Future<void> _saveDraft() async {
-    setState(() => isLoading = true);
+  @override
+  void dispose() {
+    titleController.dispose();
+    contentController.dispose();
+    super.dispose();
+  }
 
+  Future<void> _saveDraft() async {
+    if (titleController.text.isEmpty || contentController.text.isEmpty) {
+      Get.snackbar('Hata', 'Başlık ve içerik boş olamaz');
+      return;
+    }
+
+    setState(() => isLoading = true);
     try {
       await _blogApi.updateDraftBlog(
         id: widget.draft.id!,
@@ -38,7 +48,8 @@ class _DraftEditPageState extends State<DraftEditPage> {
       );
 
       Get.snackbar("Başarılı", "Taslak güncellendi");
-      Get.back(); // sayfayı kapat
+
+      Get.offAllNamed(app_pages.AppPages.DRAFTS);
     } catch (e) {
       Get.snackbar("Hata", "Taslak güncellenemedi: $e");
     } finally {
@@ -48,12 +59,12 @@ class _DraftEditPageState extends State<DraftEditPage> {
 
   Future<void> _publishDraft() async {
     setState(() => isLoading = true);
-
     try {
       await _blogApi.publishBlog(widget.draft.id!);
 
       Get.snackbar("Başarılı", "Taslak yayınlandı!");
-      Get.back(); // sayfayı kapat
+
+      Get.offAllNamed(app_pages.AppPages.DRAFTS);
     } catch (e) {
       Get.snackbar("Hata", "Yayınlama başarısız: $e");
     } finally {
@@ -78,62 +89,79 @@ class _DraftEditPageState extends State<DraftEditPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Başlık",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
                   TextField(
                     controller: titleController,
                     decoration: const InputDecoration(
+                      labelText: "Başlık",
                       border: OutlineInputBorder(),
-                      hintText: "Başlığı gir...",
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  const Text(
-                    "İçerik",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
                   Expanded(
                     child: TextField(
                       controller: contentController,
+                      decoration: const InputDecoration(
+                        labelText: "İçerik",
+                        border: OutlineInputBorder(),
+                        alignLabelWithHint: true,
+                      ),
                       maxLines: null,
                       expands: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: "İçeriği yaz...",
-                      ),
+                      textAlignVertical: TextAlignVertical.top,
                     ),
                   ),
-
                   const SizedBox(height: 20),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            foregroundColor: Colors.white,
+                      ElevatedButton(
+                        onPressed: isLoading ? null : _saveDraft,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade400,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
                           ),
-                          onPressed: _saveDraft,
-                          child: const Text("Kaydet"),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text("Kaydet"),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.pinkAccent,
-                            foregroundColor: Colors.white,
+                      ElevatedButton(
+                        onPressed: isLoading ? null : _publishDraft,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pinkAccent,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
                           ),
-                          onPressed: _publishDraft,
-                          child: const Text("Yayınla"),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text("Yayınla"),
                       ),
                     ],
                   ),

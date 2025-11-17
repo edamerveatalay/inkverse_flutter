@@ -6,6 +6,7 @@ import 'package:inkverse_flutter/app/ui/pages/drafts_page.dart';
 import 'package:inkverse_flutter/main.dart';
 import 'package:inkverse_flutter/services/blog_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:inkverse_flutter/app/routers/app_pages.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,7 +28,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> fetchBlogs() async {
     try {
       final BlogApi blogApi = BlogApi();
-      // ✅ isPublished parametresi artık backend’de "is_published" olarak bekleniyor
       final publishedBlogs = await blogApi.getBlogs(isPublished: true);
 
       setState(() {
@@ -169,7 +169,7 @@ class _HomePageState extends State<HomePage> {
               IconButton(
                 icon: const Icon(Icons.drafts_outlined, color: Colors.grey),
                 onPressed: () {
-                  Get.to(() => const DraftsPage());
+                  Get.toNamed(AppPages.DRAFTS);
                 },
               ),
               IconButton(
