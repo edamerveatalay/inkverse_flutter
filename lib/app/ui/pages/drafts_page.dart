@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/app/models/blog.dart';
+import 'package:inkverse_flutter/app/routers/app_pages.dart';
 import 'package:inkverse_flutter/app/ui/pages/drafts_edit_page.dart';
 import 'package:inkverse_flutter/services/blog_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -85,6 +87,15 @@ class _DraftsPageState extends State<DraftsPage> {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              Get.offAllNamed(AppPages.HOME);
+            },
+            tooltip: "Ana Sayfaya Dön",
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -149,8 +160,11 @@ class _DraftsPageState extends State<DraftsPage> {
                                   ),
                                 ),
                                 onPressed: () {
-                                  Get.toNamed('/drafts-edit', arguments: draft);
+                                  Get.to(
+                                    () => DraftsEditPage(draft: draft),
+                                  )?.then((_) => fetchDrafts());
                                 },
+
                                 child: const Text("Düzenle"),
                               ),
 
