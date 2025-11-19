@@ -307,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(width: 5),
           GestureDetector(
             onTap: () {
-              Get.offAllNamed(app_pages.AppPages.SIGNUP);
+              Get.toNamed('/signup');
             },
             child: Text(
               "Kayıt ol",

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CustomAppBar extends StatelessWidget {
+  final bool showBackButton;
+
+  CustomAppBar({this.showBackButton = true}); // geri butonunu opsiyonel yaptık
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -17,13 +22,13 @@ class CustomAppBar extends StatelessWidget {
         ),
         child: Row(
           children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                print("pop");
-                Navigator.of(context).pop();
-              },
-            ),
+            if (showBackButton)
+              IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Get.back();
+                },
+              ),
           ],
         ),
       ),
