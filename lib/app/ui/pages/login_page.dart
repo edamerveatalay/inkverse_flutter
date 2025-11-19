@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:inkverse_flutter/app/routers/app_pages.dart' as app_pages;
 import 'package:inkverse_flutter/app/ui/widgets/custom_shape.dart';
 import 'package:inkverse_flutter/app/ui/widgets/responsive_ui.dart';
 import 'package:inkverse_flutter/app/ui/widgets/text_form_field.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
 import 'package:inkverse_flutter/services/auth_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:inkverse_flutter/app/routers/app_pages.dart' as AppPages;
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -244,22 +246,18 @@ class _LoginScreenState extends State<LoginScreen> {
             passwordController.text.trim(),
           );
 
-          // 2️⃣ Backend yanıtını kontrol et
           if (response.statusCode == 200) {
             final data = response.data;
 
-            // 3️⃣ Backend ‘access_token’ ya da ‘token’ olarak dönüyor olabilir
             final token = data['access_token'] ?? data['token'];
 
             if (token != null) {
-              // 4️⃣ Token'ı local'e kaydet
               final prefs = await SharedPreferences.getInstance();
               await prefs.setString('token', token);
 
               print('TOKEN KAYDEDİLDİ: $token');
 
-              // 5️⃣ Ana sayfaya yönlendir
-              Get.offAllNamed(HOME_PAGE);
+              Get.offAllNamed(app_pages.AppPages.HOME);
             } else {
               Get.snackbar('Hata', 'Token alınamadı');
             }
@@ -309,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(width: 5),
           GestureDetector(
             onTap: () {
-              Navigator.of(context).pushNamed(SIGN_UP);
+              Get.offAllNamed(app_pages.AppPages.SIGNUP);
             },
             child: Text(
               "Kayıt ol",

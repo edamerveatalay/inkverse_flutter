@@ -265,8 +265,6 @@ class BlogDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-
-              // İçerik
               Text(
                 blog.content ?? '',
                 style: const TextStyle(fontSize: 16, height: 1.4),

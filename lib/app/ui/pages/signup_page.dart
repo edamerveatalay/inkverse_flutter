@@ -49,7 +49,6 @@ class _SignUpPageState extends State<SignUpPage> {
             infoTextRow(),
             socialIconsRow(),
             SizedBox(height: _height / 35),
-            backendTestButton(),
           ],
         ),
       ),
@@ -278,50 +277,6 @@ class _SignUpPageState extends State<SignUpPage> {
           backgroundImage: AssetImage("assets/images/twitterlogo.jpg"),
         ),
       ],
-    );
-  }
-
-  Widget backendTestButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-      ),
-      onPressed: () async {
-        try {
-          final response = await Dio().get(
-            'http://10.0.2.2:8000/health',
-          ); // test endpoint
-          print('Başarılı: ${response.data}');
-          Get.snackbar(
-            'Başarılı',
-            response.data.toString(),
-            snackPosition: SnackPosition.BOTTOM,
-          );
-        } on DioError catch (e) {
-          print('Dio Hata: ${e.message}');
-          if (e.response != null) {
-            print(
-              'Backend Hata: ${e.response?.statusCode} -> ${e.response?.data}',
-            );
-            Get.snackbar(
-              'Backend Hata',
-              '${e.response?.statusCode}: ${e.response?.data}',
-              snackPosition: SnackPosition.BOTTOM,
-            );
-          } else {
-            Get.snackbar(
-              'Network Hata',
-              e.message ?? 'Bilinmeyen bir hata oluştu',
-              snackPosition: SnackPosition.BOTTOM,
-            );
-          }
-        }
-      },
-      child: const Text("Backend Test", style: TextStyle(color: Colors.white)),
     );
   }
 }
