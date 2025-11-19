@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/routers/app_pages.dart' as app_pages;
 import 'package:inkverse_flutter/services/blog_api.dart';
+import 'package:markdown_editor_plus/markdown_editor_plus.dart';
 
 class AddBlogPage extends StatefulWidget {
   const AddBlogPage({super.key});
@@ -13,37 +14,30 @@ class AddBlogPage extends StatefulWidget {
 class _AddBlogPageState extends State<AddBlogPage> {
   final titleController = TextEditingController();
   final contentController = TextEditingController();
-  bool isLoading = false;
-  final BlogApi _blogApi = BlogApi();
   final tagController = TextEditingController();
   List<String> tags = [];
+  bool isLoading = false;
+  final BlogApi _blogApi = BlogApi();
 
   Future<void> _saveBlog(bool isPublished) async {
     if (titleController.text.isEmpty || contentController.text.isEmpty) {
       Get.snackbar('Hata', 'Başlık ve içerik boş olamaz');
       return;
     }
-
     setState(() => isLoading = true);
-
     try {
-      // Blog kaydetme
       await _blogApi.createBlog(
         title: titleController.text,
         content: contentController.text,
         isPublished: isPublished,
         tags: tags,
       );
-
       Get.snackbar(
         'Başarılı',
         isPublished ? 'Blog yayınlandı!' : 'Taslak kaydedildi!',
       );
-
-      // Ana sayfaya yönlendir
       Get.offAllNamed(app_pages.AppPages.HOME);
     } catch (e) {
-      print("Blog kaydetme hatası: $e");
       Get.snackbar('Hata', 'Blog kaydedilemedi: $e');
     } finally {
       setState(() => isLoading = false);
@@ -68,6 +62,7 @@ class _AddBlogPageState extends State<AddBlogPage> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            // Başlık
             TextField(
               controller: titleController,
               decoration: const InputDecoration(
@@ -78,27 +73,24 @@ class _AddBlogPageState extends State<AddBlogPage> {
 
             const SizedBox(height: 16),
 
+            // Markdown Editor
             Expanded(
-              child: TextField(
+              child: MarkdownAutoPreview(
                 controller: contentController,
-                decoration: const InputDecoration(
-                  labelText: "İçerik",
-                  border: OutlineInputBorder(),
-                  alignLabelWithHint: true,
-                ),
-                maxLines: null,
-                expands: true,
-                textAlignVertical: TextAlignVertical.top,
+                enableToolBar: true,
+                emojiConvert: true,
               ),
             ),
 
             const SizedBox(height: 20),
+
+            // Etiketler
             TextField(
               controller: tagController,
               decoration: InputDecoration(
                 labelText: "Etiket ekle (örn: flutter, dart)",
                 suffixIcon: IconButton(
-                  icon: Icon(Icons.add),
+                  icon: const Icon(Icons.add),
                   onPressed: () {
                     if (tagController.text.trim().isNotEmpty) {
                       setState(() {
@@ -108,19 +100,18 @@ class _AddBlogPageState extends State<AddBlogPage> {
                     }
                   },
                 ),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 10),
 
-            // Etiketlerin gösterimi
+            const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               children: tags
                   .map(
                     (tag) => Chip(
                       label: Text(tag),
-                      deleteIcon: Icon(Icons.close),
+                      deleteIcon: const Icon(Icons.close),
                       onDeleted: () {
                         setState(() {
                           tags.remove(tag);
@@ -130,8 +121,10 @@ class _AddBlogPageState extends State<AddBlogPage> {
                   )
                   .toList(),
             ),
+
             const SizedBox(height: 16),
 
+            // Kaydet ve Yayınla butonları
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
