@@ -53,11 +53,17 @@ class BlogApi {
     required int id,
     required String title,
     required String content,
+    List<String>? tags,
   }) async {
     try {
       final response = await _apiClient.dio.put(
         "/blog/$id",
-        data: {'title': title, 'content': content, 'is_published': false},
+        data: {
+          'title': title,
+          'content': content,
+          'is_published': false,
+          'tags': tags ?? [],
+        },
       );
 
       return Blog.fromJson(response.data);
@@ -68,11 +74,12 @@ class BlogApi {
   }
 
   /// TASLAĞI YAYINLA
-  Future<Blog> publishBlog(int id) async {
+  Future<Blog> publishBlog({required int id, List<String>? tags}) async {
     try {
       final response = await _apiClient.dio.put(
         "/blog/$id",
-        data: {'is_published': true},
+
+        data: {'is_published': true, 'tags': tags ?? []},
       );
 
       return Blog.fromJson(response.data);
