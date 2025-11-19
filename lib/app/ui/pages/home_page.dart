@@ -100,41 +100,73 @@ class _HomePageState extends State<HomePage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    blog.title ?? 'Başlık Yok',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    blog.content != null
-                                        ? blog.content.length > 100
-                                              ? blog.content.substring(0, 100) +
-                                                    "..."
-                                              : blog.content
-                                        : '',
-                                    style: const TextStyle(
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      "- Anonim", // sabit metin veya user_id gösterebilirsin
-
-                                      style: TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                        color: Colors.grey[600],
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (blog.tags != null &&
+                                        (blog.tags as List).isNotEmpty)
+                                      Wrap(
+                                        spacing: 6,
+                                        runSpacing: 6,
+                                        children: (blog.tags as List<String>)
+                                            .map((tag) {
+                                              return Chip(
+                                                label: Text(tag),
+                                                backgroundColor:
+                                                    Colors.orange.shade100,
+                                                labelStyle: const TextStyle(
+                                                  fontSize: 12,
+                                                ),
+                                              );
+                                            })
+                                            .toList(),
+                                      ),
+                                    const SizedBox(height: 16),
+                                    // Blog içeriği
+                                    Text(
+                                      blog.content ?? '',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        height: 1.4,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    Text(
+                                      blog.title ?? 'Başlık Yok',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      blog.content != null
+                                          ? blog.content.length > 100
+                                                ? blog.content.substring(
+                                                        0,
+                                                        100,
+                                                      ) +
+                                                      "..."
+                                                : blog.content
+                                          : '',
+                                      style: const TextStyle(
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        "- Anonim", // sabit metin veya user_id gösterebilirsin
+
+                                        style: TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -206,9 +238,40 @@ class BlogDetailPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(
-          child: Text(
-            blog.content ?? '',
-            style: const TextStyle(fontSize: 16, height: 1.4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Etiketler
+              if (blog.tags != null && (blog.tags as List).isNotEmpty)
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: (blog.tags as List<String>).map((tag) {
+                    return Chip(
+                      label: Text(tag),
+                      backgroundColor: Colors.orange.shade100,
+                      labelStyle: const TextStyle(fontSize: 12),
+                    );
+                  }).toList(),
+                ),
+              const SizedBox(height: 16),
+
+              // Başlık
+              Text(
+                blog.title ?? 'Başlık Yok',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // İçerik
+              Text(
+                blog.content ?? '',
+                style: const TextStyle(fontSize: 16, height: 1.4),
+              ),
+            ],
           ),
         ),
       ),

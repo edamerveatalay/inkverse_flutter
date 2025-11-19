@@ -28,11 +28,17 @@ class BlogApi {
     required String title,
     required String content,
     required bool isPublished,
+    required List<String> tags,
   }) async {
     try {
       final response = await _apiClient.dio.post(
         "/blog/",
-        data: {'title': title, 'content': content, 'is_published': isPublished},
+        data: {
+          'title': title,
+          'content': content,
+          'is_published': isPublished,
+          'tags': tags,
+        },
       );
 
       return Blog.fromJson(response.data);

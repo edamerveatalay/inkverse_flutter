@@ -15,6 +15,8 @@ class _AddBlogPageState extends State<AddBlogPage> {
   final contentController = TextEditingController();
   bool isLoading = false;
   final BlogApi _blogApi = BlogApi();
+  final tagController = TextEditingController();
+  List<String> tags = [];
 
   Future<void> _saveBlog(bool isPublished) async {
     if (titleController.text.isEmpty || contentController.text.isEmpty) {
@@ -30,6 +32,7 @@ class _AddBlogPageState extends State<AddBlogPage> {
         title: titleController.text,
         content: contentController.text,
         isPublished: isPublished,
+        tags: tags,
       );
 
       Get.snackbar(
@@ -72,7 +75,9 @@ class _AddBlogPageState extends State<AddBlogPage> {
                 border: OutlineInputBorder(),
               ),
             ),
+
             const SizedBox(height: 16),
+
             Expanded(
               child: TextField(
                 controller: contentController,
@@ -86,7 +91,47 @@ class _AddBlogPageState extends State<AddBlogPage> {
                 textAlignVertical: TextAlignVertical.top,
               ),
             ),
+
             const SizedBox(height: 20),
+            TextField(
+              controller: tagController,
+              decoration: InputDecoration(
+                labelText: "Etiket ekle (örn: flutter, dart)",
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    if (tagController.text.trim().isNotEmpty) {
+                      setState(() {
+                        tags.add(tagController.text.trim());
+                        tagController.clear();
+                      });
+                    }
+                  },
+                ),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Etiketlerin gösterimi
+            Wrap(
+              spacing: 8,
+              children: tags
+                  .map(
+                    (tag) => Chip(
+                      label: Text(tag),
+                      deleteIcon: Icon(Icons.close),
+                      onDeleted: () {
+                        setState(() {
+                          tags.remove(tag);
+                        });
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

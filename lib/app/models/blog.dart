@@ -4,6 +4,7 @@ class Blog {
   final String content;
   final int userId;
   final bool isPublished;
+  final List<String> tags;
 
   Blog({
     required this.id,
@@ -11,9 +12,9 @@ class Blog {
     required this.content,
     required this.userId,
     required this.isPublished,
+    required this.tags,
   });
 
-  // Backend’den gelen JSON’u model’e dönüştürmek için
   factory Blog.fromJson(Map<String, dynamic> json) {
     return Blog(
       id: json['id'],
@@ -21,6 +22,7 @@ class Blog {
       content: json['content'],
       userId: json['user_id'],
       isPublished: json['is_published'] ?? false,
+      tags: List<String>.from(json['tags'] ?? []),
     );
   }
 }
