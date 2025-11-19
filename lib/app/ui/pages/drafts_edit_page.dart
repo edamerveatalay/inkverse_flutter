@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/routers/app_pages.dart' as app_pages;
 import 'package:inkverse_flutter/services/blog_api.dart';
 import 'package:inkverse_flutter/app/models/blog.dart';
+import 'package:markdown_editor_plus/markdown_editor_plus.dart';
 
 class DraftsEditPage extends StatefulWidget {
   final Blog draft;
@@ -63,10 +64,7 @@ class _DraftsEditPageState extends State<DraftsEditPage> {
   Future<void> _publishDraft() async {
     setState(() => isLoading = true);
     try {
-      await _blogApi.publishBlog(
-        id: widget.draft.id!,
-        tags: tags, // tags listeni buradan gönderiyorsun
-      );
+      await _blogApi.publishBlog(id: widget.draft.id!, tags: tags);
 
       Get.snackbar("Başarılı", "Taslak yayınlandı!");
       Get.offAllNamed(app_pages.AppPages.DRAFTS);
@@ -97,7 +95,7 @@ class _DraftsEditPageState extends State<DraftsEditPage> {
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  // Başlık TextField
+                  /// BAŞLIK
                   TextField(
                     controller: titleController,
                     decoration: const InputDecoration(
@@ -107,23 +105,16 @@ class _DraftsEditPageState extends State<DraftsEditPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // İçerik TextField
                   Expanded(
-                    child: TextField(
+                    child: MarkdownAutoPreview(
                       controller: contentController,
-                      decoration: const InputDecoration(
-                        labelText: "İçerik",
-                        border: OutlineInputBorder(),
-                        alignLabelWithHint: true,
-                      ),
-                      maxLines: null,
-                      expands: true,
-                      textAlignVertical: TextAlignVertical.top,
+                      enableToolBar: true,
+                      emojiConvert: true,
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  // Etiket ekleme TextField
+                  /// ETİKET EKLEME
                   TextField(
                     controller: tagController,
                     decoration: InputDecoration(
@@ -142,32 +133,30 @@ class _DraftsEditPageState extends State<DraftsEditPage> {
                       border: const OutlineInputBorder(),
                     ),
                   ),
+
                   const SizedBox(height: 10),
 
-                  // Etiketlerin gösterimi
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: tags
-                          .map(
-                            (tag) => Chip(
-                              label: Text(tag),
-                              deleteIcon: const Icon(Icons.close),
-                              onDeleted: () {
-                                setState(() {
-                                  tags.remove(tag);
-                                });
-                              },
-                            ),
-                          )
-                          .toList(),
-                    ),
+                  /// ETİKETLERİN GÖSTERİLMESİ
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: tags
+                        .map(
+                          (tag) => Chip(
+                            label: Text(tag),
+                            deleteIcon: const Icon(Icons.close),
+                            onDeleted: () {
+                              setState(() {
+                                tags.remove(tag);
+                              });
+                            },
+                          ),
+                        )
+                        .toList(),
                   ),
                   const SizedBox(height: 16),
 
-                  // Kaydet ve Yayınla butonları
+                  /// BUTONLAR: Kaydet + Yayınla
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -176,46 +165,16 @@ class _DraftsEditPageState extends State<DraftsEditPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey.shade400,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
                         ),
-                        child: isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text("Kaydet"),
+                        child: const Text("Kaydet"),
                       ),
                       ElevatedButton(
                         onPressed: isLoading ? null : _publishDraft,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.pinkAccent,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
                         ),
-                        child: isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text("Yayınla"),
+                        child: const Text("Yayınla"),
                       ),
                     ],
                   ),
