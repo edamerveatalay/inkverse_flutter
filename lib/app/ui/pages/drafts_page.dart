@@ -29,7 +29,7 @@ class _DraftsPageState extends State<DraftsPage> {
   Future<void> fetchDrafts() async {
     try {
       // BlogApi servisini kullan
-      final response = await _blogApi.getBlogs(isPublished: false);
+      final response = await _blogApi.getMyDrafts();
 
       setState(() {
         drafts = response;

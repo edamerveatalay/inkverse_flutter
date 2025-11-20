@@ -23,7 +23,20 @@ class BlogApi {
     }
   }
 
-  /// Yeni blog oluştur (taslak veya yayınlanmış)
+  /// 🔥 Sadece giriş yapan kullanıcının TASLAKLARI
+  Future<List<Blog>> getMyDrafts() async {
+    try {
+      final response = await _apiClient.dio.get("/blog/drafts");
+
+      final data = response.data as List;
+      return data.map((json) => Blog.fromJson(json)).toList();
+    } catch (e) {
+      print("Kullanıcı taslaklarını getirme hatası: $e");
+      rethrow;
+    }
+  }
+
+  /// Yeni blog oluşturma
   Future<Blog> createBlog({
     required String title,
     required String content,
@@ -48,7 +61,7 @@ class BlogApi {
     }
   }
 
-  /// TASLAK blog düzenleme
+  /// Taslak güncelleme
   Future<Blog> updateDraftBlog({
     required int id,
     required String title,
@@ -73,12 +86,11 @@ class BlogApi {
     }
   }
 
-  /// TASLAĞI YAYINLA
+  /// Taslak yayınlama
   Future<Blog> publishBlog({required int id, List<String>? tags}) async {
     try {
       final response = await _apiClient.dio.put(
         "/blog/$id",
-
         data: {'is_published': true, 'tags': tags ?? []},
       );
 
@@ -89,7 +101,7 @@ class BlogApi {
     }
   }
 
-  /// YAYINLANMIŞ blog düzenleme
+  /// Yayınlanmış blog güncelleme
   Future<Blog> updatePublishedBlog({
     required int id,
     required String title,
