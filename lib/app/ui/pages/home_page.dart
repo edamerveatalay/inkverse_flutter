@@ -124,13 +124,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     const SizedBox(height: 16),
                                     // Blog içeriği
-                                    Text(
-                                      blog.content ?? '',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        height: 1.4,
-                                      ),
-                                    ),
+                                    // Başlık
                                     Text(
                                       blog.title ?? 'Başlık Yok',
                                       style: const TextStyle(
@@ -138,26 +132,31 @@ class _HomePageState extends State<HomePage> {
                                         fontSize: 20,
                                       ),
                                     ),
+
                                     const SizedBox(height: 8),
+
+                                    // Özet
                                     Text(
                                       blog.content != null
-                                          ? blog.content.length > 100
-                                                ? blog.content.substring(
+                                          ? (blog.content!.length > 100
+                                                ? blog.content!.substring(
                                                         0,
                                                         100,
                                                       ) +
                                                       "..."
-                                                : blog.content
+                                                : blog.content!)
                                           : '',
                                       style: const TextStyle(
+                                        fontSize: 14,
                                         color: Colors.black87,
                                       ),
                                     ),
+
                                     const SizedBox(height: 10),
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: Text(
-                                        "- Anonim", // sabit metin veya user_id gösterebilirsin
+                                        "- Anonim",
 
                                         style: TextStyle(
                                           fontStyle: FontStyle.italic,
