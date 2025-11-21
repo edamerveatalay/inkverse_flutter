@@ -7,6 +7,9 @@ import 'package:inkverse_flutter/main.dart';
 import 'package:inkverse_flutter/services/blog_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:inkverse_flutter/app/routers/app_pages.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:inkverse_flutter/app/models/comment.dart';
+import 'package:inkverse_flutter/services/comment_api.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -277,12 +280,114 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class BlogDetailPage extends StatelessWidget {
+class BlogDetailPage extends StatefulWidget {
   final dynamic blog;
   const BlogDetailPage({super.key, required this.blog});
 
   @override
+  State<BlogDetailPage> createState() => _BlogDetailPageState();
+}
+
+class _BlogDetailPageState extends State<BlogDetailPage> {
+  final TextEditingController _commentController = TextEditingController();
+  final CommentApi _commentApi = CommentApi();
+  List<Comment> _comments = [];
+  bool _isLoadingComments = true;
+  int? _currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUserId();
+    _fetchComments();
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadCurrentUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Not: login sırasında user_id kaydetmiş olman lazım: prefs.setInt('user_id', user.id)
+    setState(() {
+      _currentUserId = prefs.getInt('user_id');
+    });
+  }
+
+  Future<void> _fetchComments() async {
+    setState(() => _isLoadingComments = true);
+    try {
+      final comments = await _commentApi.getComments(widget.blog.id);
+      setState(() {
+        _comments = comments;
+        _isLoadingComments = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingComments = false);
+      debugPrint("Yorumları çekerken hata: $e");
+      Get.snackbar('Hata', 'Yorumlar yüklenemedi');
+    }
+  }
+
+  Future<void> _postComment() async {
+    final text = _commentController.text.trim();
+    if (text.isEmpty) return;
+
+    try {
+      final newComment = await _commentApi.addComment(
+        blogId: widget.blog.id,
+        content: text,
+      );
+      _commentController.clear();
+      setState(() {
+        _comments.insert(0, newComment);
+      });
+      Get.snackbar('Başarılı', 'Yorum eklendi');
+    } catch (e) {
+      debugPrint("Yorum ekleme hatası: $e");
+      Get.snackbar('Hata', 'Yorum eklenirken hata oluştu');
+    }
+  }
+
+  Future<void> _deleteComment(int commentId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Yorumu sil"),
+        content: const Text("Bu yorumu silmek istediğinizden emin misiniz?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text("İptal"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text("Sil"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await _commentApi.deleteComment(commentId: commentId);
+      setState(() {
+        _comments.removeWhere((c) => c.id == commentId);
+      });
+      Get.snackbar('Başarılı', 'Yorum silindi');
+    } catch (e) {
+      debugPrint("Yorum silme hatası: $e");
+      Get.snackbar('Hata', 'Yorum silinirken hata oluştu');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final blog = widget.blog;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(blog.title ?? "Detay"),
@@ -296,40 +401,142 @@ class BlogDetailPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Etiketler
-              if (blog.tags != null && (blog.tags as List).isNotEmpty)
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: (blog.tags as List<String>).map((tag) {
-                    return Chip(
-                      label: Text(tag),
-                      backgroundColor: Colors.orange.shade100,
-                      labelStyle: const TextStyle(fontSize: 12),
-                    );
-                  }).toList(),
-                ),
-              const SizedBox(height: 16),
+        child: Column(
+          children: [
+            // Blog içeriği
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (blog.tags != null && (blog.tags as List).isNotEmpty)
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: (blog.tags as List<String>).map((tag) {
+                          return Chip(
+                            label: Text(tag),
+                            backgroundColor: Colors.orange.shade100,
+                            labelStyle: const TextStyle(fontSize: 12),
+                          );
+                        }).toList(),
+                      ),
+                    const SizedBox(height: 16),
 
-              // Başlık
-              Text(
-                blog.title ?? 'Başlık Yok',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                    Text(
+                      blog.title ?? 'Başlık Yok',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      blog.content ?? '',
+                      style: const TextStyle(fontSize: 16, height: 1.4),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Yorum başlığı + yenile
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Yorumlar",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.refresh),
+                          onPressed: _fetchComments,
+                          tooltip: "Yorumları yenile",
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // Yorum listesi
+                    if (_isLoadingComments)
+                      const Center(child: CircularProgressIndicator())
+                    else if (_comments.isEmpty)
+                      const Text("Henüz yorum yok. İlk yorumu siz yazın!")
+                    else
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final c = _comments[index];
+                          return ListTile(
+                            title: Text(c.content),
+                            subtitle: Text(
+                              c.author != null
+                                  ? "${c.author} • ${c.createdAt.toLocal()}"
+                                  : "Kullanıcı ${c.userId} • ${c.createdAt.toLocal()}",
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            trailing:
+                                (_currentUserId != null &&
+                                    c.userId == _currentUserId)
+                                ? IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () => _deleteComment(c.id),
+                                  )
+                                : null,
+                          );
+                        },
+                        separatorBuilder: (_, __) => const Divider(),
+                        itemCount: _comments.length,
+                      ),
+
+                    const SizedBox(height: 16),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                blog.content ?? '',
-                style: const TextStyle(fontSize: 16, height: 1.4),
+            ),
+
+            // Yorum gönderme alanı
+            SafeArea(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _commentController,
+                      minLines: 1,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: "Yorum yaz...",
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade200,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.send, color: Colors.white),
+                      onPressed: _postComment,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

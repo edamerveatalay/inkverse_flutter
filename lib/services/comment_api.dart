@@ -11,7 +11,7 @@ class CommentApi {
   Future<List<Comment>> getComments(int blogId) async {
     try {
       final response = await _apiClient.dio.get(
-        "/",
+        "/comment/",
         queryParameters: {"blog_id": blogId},
       );
 
@@ -33,7 +33,7 @@ class CommentApi {
       final token = prefs.getString('token');
 
       final response = await _apiClient.dio.post(
-        "/",
+        "/comment/",
         queryParameters: {"blog_id": blogId},
         data: {"content": content},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -56,7 +56,7 @@ class CommentApi {
       final token = prefs.getString('token');
 
       final response = await _apiClient.dio.put(
-        "/",
+        "/comment/", // DÜZELTİLDİ
         queryParameters: {"comment_id": commentId},
         data: {"content": content},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -76,7 +76,7 @@ class CommentApi {
       final token = prefs.getString('token');
 
       final response = await _apiClient.dio.delete(
-        "/",
+        "/comment/",
         queryParameters: {"comment_id": commentId},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
