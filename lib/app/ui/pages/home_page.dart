@@ -125,15 +125,76 @@ class _HomePageState extends State<HomePage> {
                                     const SizedBox(height: 16),
                                     // Blog içeriği
                                     // Başlık
-                                    Text(
-                                      blog.title ?? 'Başlık Yok',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
-                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            blog.title ?? 'Başlık Yok',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
+                                          ),
+                                          onPressed: () async {
+                                            final confirm = await showDialog<bool>(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const Text(
+                                                  "Emin misiniz?",
+                                                ),
+                                                content: const Text(
+                                                  "Bu blogu silmek istediğinize emin misiniz?",
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop(false),
+                                                    child: const Text("İptal"),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(
+                                                          context,
+                                                        ).pop(true),
+                                                    child: const Text("Sil"),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
 
-                                    const SizedBox(height: 8),
+                                            if (confirm == true) {
+                                              try {
+                                                await BlogApi().deleteBlog(
+                                                  blog.id,
+                                                );
+                                                setState(() {
+                                                  blogs.remove(blog);
+                                                });
+                                                Get.snackbar(
+                                                  'Başarılı',
+                                                  'Blog silindi',
+                                                );
+                                              } catch (e) {
+                                                Get.snackbar(
+                                                  'Hata',
+                                                  'Blog silinirken bir hata oluştu',
+                                                );
+                                              }
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    ),
 
                                     // Özet
                                     Text(

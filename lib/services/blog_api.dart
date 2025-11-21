@@ -119,4 +119,17 @@ class BlogApi {
       rethrow;
     }
   }
+
+  Future<void> deleteBlog(int blogId) async {
+    try {
+      final response = await _apiClient.dio.delete('/blog/$blogId');
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Blog silinemedi');
+      }
+    } catch (e) {
+      print("Blog silme hatası: $e");
+      rethrow;
+    }
+  }
 }
