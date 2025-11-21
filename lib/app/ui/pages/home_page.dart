@@ -156,8 +156,7 @@ class _HomePageState extends State<HomePage> {
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: Text(
-                                        "- Anonim",
-
+                                        "Yazar: ${blog.user?.username ?? 'Bilinmiyor'}",
                                         style: TextStyle(
                                           fontStyle: FontStyle.italic,
                                           color: Colors.grey[600],

@@ -1,3 +1,5 @@
+import 'package:inkverse_flutter/app/models/user.dart';
+
 class Blog {
   final int id;
   final String title;
@@ -5,7 +7,7 @@ class Blog {
   final int userId;
   final bool isPublished;
   final List<String> tags;
-
+  final UserModel? user;
   Blog({
     required this.id,
     required this.title,
@@ -13,16 +15,18 @@ class Blog {
     required this.userId,
     required this.isPublished,
     required this.tags,
+    this.user,
   });
 
   factory Blog.fromJson(Map<String, dynamic> json) {
     return Blog(
       id: json['id'],
-      title: json['title'],
-      content: json['content'],
+      title: json['title'] ?? 'Başlıksız',
+      content: json['content'] ?? '',
       userId: json['user_id'],
       isPublished: json['is_published'] ?? false,
       tags: List<String>.from(json['tags'] ?? []),
+      user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
     );
   }
 }
