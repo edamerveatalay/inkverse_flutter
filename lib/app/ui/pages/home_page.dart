@@ -148,6 +148,51 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                   ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(
+                                          blog.isLiked
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color: Colors.pinkAccent,
+                                        ),
+                                        onPressed: () async {
+                                          final api = BlogApi();
+                                          bool success;
+                                          if (blog.isLiked) {
+                                            success = await api.unlikeBlog(
+                                              blog.id,
+                                            );
+                                            if (success) {
+                                              setState(() {
+                                                blog.isLiked = false;
+                                                blog.likesCount =
+                                                    (blog.likesCount ?? 1) - 1;
+                                              });
+                                            }
+                                          } else {
+                                            success = await api.likeBlog(
+                                              blog.id,
+                                            );
+                                            if (success) {
+                                              setState(() {
+                                                blog.isLiked = true;
+                                                blog.likesCount =
+                                                    (blog.likesCount ?? 0) + 1;
+                                              });
+                                            }
+                                          }
+                                        },
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        "${blog.likesCount ?? 0} Beğeni",
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
