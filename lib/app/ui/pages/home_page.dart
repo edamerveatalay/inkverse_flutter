@@ -191,6 +191,57 @@ class _HomePageState extends State<HomePage> {
                                         "${blog.likesCount ?? 0} Beğeni",
                                         style: const TextStyle(fontSize: 14),
                                       ),
+                                      const SizedBox(width: 8),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () async {
+                                          final confirm = await showDialog<bool>(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text("Blogu sil"),
+                                              content: const Text(
+                                                "Bu blogu silmek istediğinizden emin misiniz?",
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(
+                                                    context,
+                                                  ).pop(false),
+                                                  child: const Text("İptal"),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(
+                                                    context,
+                                                  ).pop(true),
+                                                  child: const Text("Sil"),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+
+                                          if (confirm != true) return;
+
+                                          try {
+                                            await BlogApi().deleteBlog(blog.id);
+                                            setState(() {
+                                              blogs.removeAt(index);
+                                            });
+                                            Get.snackbar(
+                                              'Başarılı',
+                                              'Blog silindi',
+                                            );
+                                          } catch (e) {
+                                            debugPrint('Blog silme hatası: $e');
+                                            Get.snackbar(
+                                              'Hata',
+                                              'Blog silinemedi',
+                                            );
+                                          }
+                                        },
+                                      ),
                                     ],
                                   ),
                                 ],
