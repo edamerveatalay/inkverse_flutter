@@ -33,6 +33,8 @@ class _HomePageState extends State<HomePage> {
       final publishedBlogs = await blogApi.getBlogs(isPublished: true);
       setState(() {
         blogs = publishedBlogs;
+        // En yeni blog en üstte olacak şekilde sırala
+        blogs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         isLoading = false;
       });
     } catch (e) {

@@ -10,6 +10,8 @@ class Blog {
   final UserModel? user;
   int likesCount;
   bool isLiked;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   Blog({
     required this.id,
@@ -21,6 +23,8 @@ class Blog {
     this.user,
     required this.likesCount,
     required this.isLiked,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory Blog.fromJson(Map<String, dynamic> json) {
@@ -34,6 +38,8 @@ class Blog {
       user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
       likesCount: json['likes_count'] ?? 0,
       isLiked: json['is_liked'] ?? false,
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
     );
   }
 }
