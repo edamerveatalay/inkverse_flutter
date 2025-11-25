@@ -8,6 +8,9 @@ class Blog {
   final bool isPublished;
   final List<String> tags;
   final UserModel? user;
+  int likesCount;
+  bool isLiked;
+
   Blog({
     required this.id,
     required this.title,
@@ -16,6 +19,8 @@ class Blog {
     required this.isPublished,
     required this.tags,
     this.user,
+    required this.likesCount,
+    required this.isLiked,
   });
 
   factory Blog.fromJson(Map<String, dynamic> json) {
@@ -27,6 +32,8 @@ class Blog {
       isPublished: json['is_published'] ?? false,
       tags: List<String>.from(json['tags'] ?? []),
       user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
+      likesCount: json['likes_count'] ?? 0,
+      isLiked: json['is_liked'] ?? false,
     );
   }
 }

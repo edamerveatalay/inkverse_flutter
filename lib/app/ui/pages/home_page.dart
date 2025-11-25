@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
+import 'package:inkverse_flutter/app/models/blog.dart';
+import 'package:inkverse_flutter/app/models/comment.dart';
 import 'package:inkverse_flutter/app/ui/pages/add_blog_page.dart';
-import 'package:inkverse_flutter/app/ui/pages/drafts_page.dart';
-import 'package:inkverse_flutter/main.dart';
 import 'package:inkverse_flutter/services/blog_api.dart';
+import 'package:inkverse_flutter/services/comment_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:inkverse_flutter/app/routers/app_pages.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:inkverse_flutter/app/models/comment.dart';
-import 'package:inkverse_flutter/services/comment_api.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,7 +17,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<dynamic> blogs = [];
+  List<Blog> blogs = [];
   bool isLoading = true;
 
   @override
@@ -29,10 +27,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> fetchBlogs() async {
+    setState(() => isLoading = true);
     try {
       final BlogApi blogApi = BlogApi();
       final publishedBlogs = await blogApi.getBlogs(isPublished: true);
-
       setState(() {
         blogs = publishedBlogs;
         isLoading = false;
@@ -78,7 +76,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16),
                       itemCount: blogs.length,
                       itemBuilder: (context, index) {
                         final blog = blogs[index];
@@ -103,132 +101,54 @@ class _HomePageState extends State<HomePage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               padding: const EdgeInsets.all(16),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (blog.tags != null &&
-                                        (blog.tags as List).isNotEmpty)
-                                      Wrap(
-                                        spacing: 6,
-                                        runSpacing: 6,
-                                        children: (blog.tags as List<String>)
-                                            .map((tag) {
-                                              return Chip(
-                                                label: Text(tag),
-                                                backgroundColor:
-                                                    Colors.orange.shade100,
-                                                labelStyle: const TextStyle(
-                                                  fontSize: 12,
-                                                ),
-                                              );
-                                            })
-                                            .toList(),
-                                      ),
-                                    const SizedBox(height: 16),
-                                    // Blog içeriği
-                                    // Başlık
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            blog.title ?? 'Başlık Yok',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 20,
-                                            ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (blog.tags.isNotEmpty)
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: 6,
+                                      children: blog.tags.map((tag) {
+                                        return Chip(
+                                          label: Text(tag),
+                                          backgroundColor:
+                                              Colors.orange.shade100,
+                                          labelStyle: const TextStyle(
+                                            fontSize: 12,
                                           ),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(
-                                            Icons.delete,
-                                            color: Colors.red,
-                                          ),
-                                          onPressed: () async {
-                                            final confirm = await showDialog<bool>(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const Text(
-                                                  "Emin misiniz?",
-                                                ),
-                                                content: const Text(
-                                                  "Bu blogu silmek istediğinize emin misiniz?",
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.of(
-                                                          context,
-                                                        ).pop(false),
-                                                    child: const Text("İptal"),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.of(
-                                                          context,
-                                                        ).pop(true),
-                                                    child: const Text("Sil"),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-
-                                            if (confirm == true) {
-                                              try {
-                                                await BlogApi().deleteBlog(
-                                                  blog.id,
-                                                );
-                                                setState(() {
-                                                  blogs.remove(blog);
-                                                });
-                                                Get.snackbar(
-                                                  'Başarılı',
-                                                  'Blog silindi',
-                                                );
-                                              } catch (e) {
-                                                Get.snackbar(
-                                                  'Hata',
-                                                  'Blog silinirken bir hata oluştu',
-                                                );
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      ],
+                                        );
+                                      }).toList(),
                                     ),
-
-                                    // Özet
-                                    Text(
-                                      blog.content != null
-                                          ? (blog.content!.length > 100
-                                                ? blog.content!.substring(
-                                                        0,
-                                                        100,
-                                                      ) +
-                                                      "..."
-                                                : blog.content!)
-                                          : '',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black87,
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    blog.title,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    blog.content.length > 100
+                                        ? "${blog.content.substring(0, 100)}..."
+                                        : blog.content,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      "Yazar: ${blog.user?.username ?? 'Bilinmiyor'}",
+                                      style: TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.grey[600],
                                       ),
                                     ),
-
-                                    const SizedBox(height: 10),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                        "Yazar: ${blog.user?.username ?? 'Bilinmiyor'}",
-                                        style: TextStyle(
-                                          fontStyle: FontStyle.italic,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -242,11 +162,10 @@ class _HomePageState extends State<HomePage> {
         onPressed: () async {
           final result = await Get.to(() => const AddBlogPage());
           if (result == true) {
-            await fetchBlogs(); // yeni blog eklendiğinde listeyi yenile
+            await fetchBlogs();
           }
         },
       ),
-
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
@@ -258,7 +177,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               IconButton(
                 icon: const Icon(Icons.home, color: Colors.pinkAccent),
-                onPressed: () {}, // zaten buradayız
+                onPressed: () {},
               ),
               IconButton(
                 icon: const Icon(Icons.drafts_outlined, color: Colors.grey),
@@ -280,8 +199,12 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+/// ----------------------------------------------
+/// BlogDetailPage HÂLÂ AYNI DOSYADA DURUYOR
+/// ----------------------------------------------
+
 class BlogDetailPage extends StatefulWidget {
-  final dynamic blog;
+  final Blog blog;
   const BlogDetailPage({super.key, required this.blog});
 
   @override
@@ -310,7 +233,6 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
 
   Future<void> _loadCurrentUserId() async {
     final prefs = await SharedPreferences.getInstance();
-    // Not: login sırasında user_id kaydetmiş olman lazım: prefs.setInt('user_id', user.id)
     setState(() {
       _currentUserId = prefs.getInt('user_id');
     });
@@ -390,7 +312,7 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(blog.title ?? "Detay"),
+        title: Text(blog.title),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -403,17 +325,16 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Blog içeriği
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (blog.tags != null && (blog.tags as List).isNotEmpty)
+                    if (blog.tags.isNotEmpty)
                       Wrap(
                         spacing: 6,
                         runSpacing: 6,
-                        children: (blog.tags as List<String>).map((tag) {
+                        children: blog.tags.map((tag) {
                           return Chip(
                             label: Text(tag),
                             backgroundColor: Colors.orange.shade100,
@@ -422,9 +343,8 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                         }).toList(),
                       ),
                     const SizedBox(height: 16),
-
                     Text(
-                      blog.title ?? 'Başlık Yok',
+                      blog.title,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24,
@@ -432,13 +352,53 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      blog.content ?? '',
+                      blog.content,
                       style: const TextStyle(fontSize: 16, height: 1.4),
                     ),
-
                     const SizedBox(height: 24),
-
-                    // Yorum başlığı + yenile
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            blog.isLiked
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: Colors.pinkAccent,
+                            size: 30,
+                          ),
+                          onPressed: () async {
+                            final api = BlogApi();
+                            bool success;
+                            if (blog.isLiked) {
+                              success = await api.unlikeBlog(blog.id);
+                              if (success) {
+                                setState(() {
+                                  blog.isLiked = false;
+                                  blog.likesCount -= 1;
+                                });
+                              }
+                            } else {
+                              success = await api.likeBlog(blog.id);
+                              if (success) {
+                                setState(() {
+                                  blog.isLiked = true;
+                                  blog.likesCount += 1;
+                                });
+                              }
+                            }
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "${blog.likesCount} Beğeni",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -452,14 +412,9 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                         IconButton(
                           icon: const Icon(Icons.refresh),
                           onPressed: _fetchComments,
-                          tooltip: "Yorumları yenile",
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 8),
-
-                    // Yorum listesi
                     if (_isLoadingComments)
                       const Center(child: CircularProgressIndicator())
                     else if (_comments.isEmpty)
@@ -468,6 +423,8 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                       ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _comments.length,
+                        separatorBuilder: (_, __) => const Divider(),
                         itemBuilder: (context, index) {
                           final c = _comments[index];
                           return ListTile(
@@ -491,17 +448,11 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                                 : null,
                           );
                         },
-                        separatorBuilder: (_, __) => const Divider(),
-                        itemCount: _comments.length,
                       ),
-
-                    const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
-
-            // Yorum gönderme alanı
             SafeArea(
               child: Row(
                 children: [

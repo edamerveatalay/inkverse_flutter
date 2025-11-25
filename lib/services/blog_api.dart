@@ -132,4 +132,47 @@ class BlogApi {
       rethrow;
     }
   }
+
+  /// Blog beğenme
+  Future<bool> likeBlog(int blogId) async {
+    try {
+      final response = await _apiClient.dio.post(
+        "/likes/",
+        data: {"blog_id": blogId},
+      );
+      return response.statusCode == 201;
+    } catch (e) {
+      print("Beğenme hatası: $e");
+      return false;
+    }
+  }
+
+  ///  Blog beğenisini kaldırma
+  Future<bool> unlikeBlog(int blogId) async {
+    try {
+      final response = await _apiClient.dio.delete(
+        "/likes/",
+        queryParameters: {"blog_id": blogId},
+      );
+      return response.statusCode == 204;
+    } catch (e) {
+      print("Beğeni kaldırma hatası: $e");
+      return false;
+    }
+  }
+
+  ///  Kullanıcı bu blogu beğenmiş mi?
+  Future<bool> checkLikeStatus(int blogId) async {
+    try {
+      final response = await _apiClient.dio.get(
+        "/likes/",
+        queryParameters: {"blog_id": blogId},
+      );
+
+      // Eğer backend beğeni varsa LikeRead döndürüyor, yoksa null
+      return response.data != null;
+    } catch (e) {
+      return false; // beğeni yoksa
+    }
+  }
 }
