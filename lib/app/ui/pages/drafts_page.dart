@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
@@ -16,6 +18,14 @@ class DraftsPage extends StatefulWidget {
 }
 
 class _DraftsPageState extends State<DraftsPage> {
+  String getFullImageUrl(String? url) {
+    if (url == null || url.isEmpty) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    return "$BASE_URL/$url";
+  }
+
   List<dynamic> drafts = [];
   bool isLoading = true;
   final BlogApi _blogApi = BlogApi();
@@ -130,6 +140,25 @@ class _DraftsPageState extends State<DraftsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if (draft.imageUrl != null &&
+                              draft.imageUrl!.isNotEmpty)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: draft.imageUrl!.startsWith("/data/")
+                                  ? Image.file(
+                                      File(draft.imageUrl!),
+                                      height: 180,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.network(
+                                      getFullImageUrl(draft.imageUrl),
+                                      height: 180,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                          const SizedBox(height: 12),
                           Text(
                             draft.title ?? 'Başlık Yok',
                             style: const TextStyle(
