@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/constants/constants.dart';
@@ -17,6 +19,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String getFullImageUrl(String? url) {
+    if (url == null || url.isEmpty) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url; // zaten tam URL
+    }
+    return "$BASE_URL/$url";
+  }
+
   List<Blog> blogs = [];
   bool isLoading = true;
 
@@ -82,6 +92,7 @@ class _HomePageState extends State<HomePage> {
                       itemCount: blogs.length,
                       itemBuilder: (context, index) {
                         final blog = blogs[index];
+                        final imageUrl = getFullImageUrl(blog.imageUrl);
                         return GestureDetector(
                           onTap: () {
                             Get.to(() => BlogDetailPage(blog: blog));
@@ -110,13 +121,24 @@ class _HomePageState extends State<HomePage> {
                                       blog.imageUrl!.isNotEmpty)
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
-                                      child: Image.network(
-                                        blog.imageUrl!,
-                                        height: 180,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                      ),
+                                      child:
+                                          blog.imageUrl!.startsWith(
+                                            "/data/",
+                                          ) // cihaz cache yoluysa
+                                          ? Image.file(
+                                              File(blog.imageUrl!),
+                                              height: 180,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : Image.network(
+                                              getFullImageUrl(blog.imageUrl),
+                                              height: 180,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                            ),
                                     ),
+
                                   const SizedBox(height: 12),
 
                                   if (blog.tags.isNotEmpty)
@@ -309,10 +331,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-/// ----------------------------------------------
-/// BlogDetailPage HÂLÂ AYNI DOSYADA DURUYOR
-/// ----------------------------------------------
 
 class BlogDetailPage extends StatefulWidget {
   final Blog blog;
