@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:inkverse_flutter/app/routers/app_pages.dart' as app_pages;
 import 'package:inkverse_flutter/services/blog_api.dart';
 import 'package:markdown_editor_plus/markdown_editor_plus.dart';
@@ -19,6 +22,22 @@ class _AddBlogPageState extends State<AddBlogPage> {
   bool isLoading = false;
   final BlogApi _blogApi = BlogApi();
 
+  String? imageUrl;
+
+  Future<void> pickImage() async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(source: ImageSource.gallery);
+
+    if (file != null) {
+      setState(() {
+        imageUrl = file.path; // Şimdilik local path
+      });
+
+      // Burada Cloudinary upload işlemini yapabiliriz
+      // imageUrl = await uploadImageToCloudinary(file)
+    }
+  }
+
   Future<void> _saveBlog(bool isPublished) async {
     if (titleController.text.isEmpty || contentController.text.isEmpty) {
       Get.snackbar('Hata', 'Başlık ve içerik boş olamaz');
@@ -31,6 +50,7 @@ class _AddBlogPageState extends State<AddBlogPage> {
         content: contentController.text,
         isPublished: isPublished,
         tags: tags,
+        imageUrl: imageUrl,
       );
       Get.snackbar(
         'Başarılı',
@@ -68,6 +88,32 @@ class _AddBlogPageState extends State<AddBlogPage> {
               decoration: const InputDecoration(
                 labelText: "Başlık",
                 border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            GestureDetector(
+              onTap: pickImage,
+              child: Container(
+                height: 180,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: imageUrl == null
+                    ? const Center(
+                        child: Text(
+                          "Kapak görseli eklemek için dokun",
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(File(imageUrl!), fit: BoxFit.cover),
+                      ),
               ),
             ),
 

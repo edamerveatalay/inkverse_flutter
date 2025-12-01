@@ -106,6 +106,19 @@ class _HomePageState extends State<HomePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  if (blog.imageUrl != null &&
+                                      blog.imageUrl!.isNotEmpty)
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.network(
+                                        blog.imageUrl!,
+                                        height: 180,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  const SizedBox(height: 12),
+
                                   if (blog.tags.isNotEmpty)
                                     Wrap(
                                       spacing: 6,

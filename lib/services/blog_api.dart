@@ -23,7 +23,6 @@ class BlogApi {
     }
   }
 
-  /// 🔥 Sadece giriş yapan kullanıcının TASLAKLARI
   Future<List<Blog>> getMyDrafts() async {
     try {
       final response = await _apiClient.dio.get("/blog/drafts");
@@ -42,6 +41,7 @@ class BlogApi {
     required String content,
     required bool isPublished,
     required List<String> tags,
+    String? imageUrl,
   }) async {
     try {
       final response = await _apiClient.dio.post(
@@ -51,6 +51,7 @@ class BlogApi {
           'content': content,
           'is_published': isPublished,
           'tags': tags,
+          'image_url': imageUrl,
         },
       );
 
