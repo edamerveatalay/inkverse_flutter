@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:inkverse_flutter/app/models/blog.dart';
 import 'api_client.dart';
@@ -68,38 +70,40 @@ class BlogApi {
     required String title,
     required String content,
     List<String>? tags,
+    String? imageUrl,
   }) async {
-    try {
-      final response = await _apiClient.dio.put(
-        "/blog/$id",
-        data: {
-          'title': title,
-          'content': content,
-          'is_published': false,
-          'tags': tags ?? [],
-        },
-      );
-
-      return Blog.fromJson(response.data);
-    } catch (e) {
-      print("Taslak güncelleme hatası: $e");
-      rethrow;
-    }
+    final response = await _apiClient.dio.put(
+      "/blog/$id",
+      data: {
+        'title': title,
+        'content': content,
+        'is_published': false,
+        'tags': tags,
+        'image_url': imageUrl, //  JSON formatında
+      },
+    );
+    return Blog.fromJson(response.data);
   }
 
   /// Taslak yayınlama
-  Future<Blog> publishBlog({required int id, List<String>? tags}) async {
-    try {
-      final response = await _apiClient.dio.put(
-        "/blog/$id",
-        data: {'is_published': true, 'tags': tags ?? []},
-      );
-
-      return Blog.fromJson(response.data);
-    } catch (e) {
-      print("Yayınlama hatası: $e");
-      rethrow;
-    }
+  Future<Blog> publishDraftBlog({
+    required int id,
+    required String title,
+    required String content,
+    List<String>? tags,
+    String? imageUrl,
+  }) async {
+    final response = await _apiClient.dio.post(
+      // ✅ POST kullan
+      "/blog/$id/publish",
+      data: {
+        'title': title,
+        'content': content,
+        'tags': tags,
+        'image_url': imageUrl,
+      },
+    );
+    return Blog.fromJson(response.data);
   }
 
   /// Yayınlanmış blog güncelleme

@@ -30,10 +30,9 @@ class _AddBlogPageState extends State<AddBlogPage> {
 
     if (file != null) {
       setState(() {
-        imageUrl = file.path; // Şimdilik local path
+        imageUrl = file.path;
       });
 
-      // Burada Cloudinary upload işlemini yapabiliriz
       // imageUrl = await uploadImageToCloudinary(file)
     }
   }
