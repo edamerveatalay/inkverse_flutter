@@ -25,6 +25,165 @@ class _DraftsEditPageState extends State<DraftsEditPage> {
   File? selectedImage;
   bool isLoading = false;
 
+  // MARKDOWN TOOLBAR FONKSİYONLARI
+  Widget _buildToolbarButton(
+    String label,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Material(
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        elevation: 1,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: Colors.pinkAccent),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pinkAccent,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _insertText(String prefix, String suffix) {
+    final text = contentController.text;
+    final selection = contentController.selection;
+
+    if (selection.start == -1) {
+      final cursorPos = selection.baseOffset;
+      final newText =
+          text.substring(0, cursorPos) +
+          prefix +
+          suffix +
+          text.substring(cursorPos);
+      contentController.text = newText;
+      contentController.selection = TextSelection.collapsed(
+        offset: cursorPos + prefix.length,
+      );
+    } else {
+      final newText = text.replaceRange(
+        selection.start,
+        selection.end,
+        '$prefix${selection.textInside(text)}$suffix',
+      );
+      contentController.text = newText;
+      contentController.selection = TextSelection.collapsed(
+        offset:
+            selection.start +
+            prefix.length +
+            selection.textInside(text).length +
+            suffix.length,
+      );
+    }
+  }
+
+  void _insertListItem() {
+    final text = contentController.text;
+    final selection = contentController.selection;
+    final cursorPos = selection.baseOffset;
+
+    if (cursorPos == 0) {
+      contentController.text = '- ' + text;
+      contentController.selection = TextSelection.collapsed(offset: 2);
+      return;
+    }
+
+    final beforeCursor = text.substring(0, cursorPos);
+    final afterCursor = text.substring(cursorPos);
+    final lines = beforeCursor.split('\n');
+
+    if (lines.isEmpty) {
+      contentController.text = '- ' + text;
+      contentController.selection = TextSelection.collapsed(offset: 2);
+      return;
+    }
+
+    final currentLine = lines.last;
+
+    if (currentLine.startsWith('- ') ||
+        currentLine.startsWith('* ') ||
+        currentLine.startsWith('+ ')) {
+      final bullet = currentLine.substring(0, 2);
+      contentController.text = beforeCursor + '\n' + bullet + afterCursor;
+      contentController.selection = TextSelection.collapsed(
+        offset: cursorPos + '\n'.length + bullet.length,
+      );
+    } else if (RegExp(r'^\d+\. ').hasMatch(currentLine)) {
+      final match = RegExp(r'^(\d+)\. ').firstMatch(currentLine);
+      if (match != null) {
+        final num = int.parse(match.group(1)!);
+        contentController.text = beforeCursor + '\n${num + 1}. ' + afterCursor;
+        contentController.selection = TextSelection.collapsed(
+          offset: cursorPos + '\n${num + 1}. '.length,
+        );
+      }
+    } else {
+      contentController.text = beforeCursor + '- ' + afterCursor;
+      contentController.selection = TextSelection.collapsed(
+        offset: cursorPos + 2,
+      );
+    }
+  }
+
+  void _showEmojiPicker() {
+    final emojis = ['😊', '😂', '🥰', '😎', '🤔', '🚀', '🎉', '📝', '💻', '🔗'];
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          height: 200,
+          padding: const EdgeInsets.all(16),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 5,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: emojis.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  _insertText(emojis[index], '');
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Text(
+                      emojis[index],
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -170,10 +329,144 @@ class _DraftsEditPageState extends State<DraftsEditPage> {
 
                   /// İÇERİK
                   Expanded(
-                    child: MarkdownAutoPreview(
-                      controller: contentController,
-                      enableToolBar: true,
-                      emojiConvert: true,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Column(
+                            children: [
+                              // EDITOR ALANI (Scrollable)
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // Editor'e tıklandığında klavyeyi aç
+                                    print("Editor'e tıklandı!");
+                                    // Önce mevcut odağı kapat
+                                    FocusScope.of(context).unfocus();
+                                    // Sonra editor'e odaklan
+                                    Future.delayed(
+                                      const Duration(milliseconds: 100),
+                                      () {
+                                        final focusNode = FocusNode();
+                                        FocusScope.of(
+                                          context,
+                                        ).requestFocus(focusNode);
+                                        Future.delayed(
+                                          const Duration(milliseconds: 300),
+                                          () {
+                                            focusNode.dispose();
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: SingleChildScrollView(
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        minHeight: constraints.maxHeight - 50,
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: MarkdownAutoPreview(
+                                          controller: contentController,
+                                          emojiConvert: true,
+                                          enableToolBar: true,
+                                          decoration: const InputDecoration(
+                                            hintText: '''İçeriğini yaz...
+
+# Başlık için
+## Alt başlık için
+**kalın** için
+*italik* için
+- liste için (• butonuna tıkla)
+> alıntı için  
+\`\`\`kod bloğu için\`\`\`
+[bağlantı](url) için
+
+''',
+                                            border: InputBorder.none,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // SABİT TOOLBAR (AŞAĞIDA)
+                              Container(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade50,
+                                  border: Border(
+                                    top: BorderSide(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(width: 10),
+                                      _buildToolbarButton(
+                                        'B',
+                                        Icons.format_bold,
+                                        () => _insertText('**', '**'),
+                                      ),
+                                      _buildToolbarButton(
+                                        'I',
+                                        Icons.format_italic,
+                                        () => _insertText('*', '*'),
+                                      ),
+                                      _buildToolbarButton(
+                                        'H1',
+                                        Icons.title,
+                                        () => _insertText('# ', ''),
+                                      ),
+                                      _buildToolbarButton(
+                                        'H2',
+                                        Icons.title,
+                                        () => _insertText('## ', ''),
+                                      ),
+                                      _buildToolbarButton(
+                                        '•',
+                                        Icons.format_list_bulleted,
+                                        _insertListItem,
+                                      ),
+                                      _buildToolbarButton(
+                                        '😊',
+                                        Icons.emoji_emotions,
+                                        _showEmojiPicker,
+                                      ),
+                                      _buildToolbarButton(
+                                        '>',
+                                        Icons.format_quote,
+                                        () => _insertText('> ', ''),
+                                      ),
+                                      _buildToolbarButton(
+                                        '```',
+                                        Icons.code,
+                                        () => _insertText('```\n', '\n```'),
+                                      ),
+                                      _buildToolbarButton(
+                                        'Link',
+                                        Icons.link,
+                                        () => _insertText('[', '](url)'),
+                                      ),
+                                      const SizedBox(width: 10),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 16),
