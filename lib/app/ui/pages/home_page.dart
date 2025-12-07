@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -92,7 +93,6 @@ class _HomePageState extends State<HomePage> {
                       itemCount: blogs.length,
                       itemBuilder: (context, index) {
                         final blog = blogs[index];
-                        final imageUrl = getFullImageUrl(blog.imageUrl);
                         return GestureDetector(
                           onTap: () {
                             Get.to(() => BlogDetailPage(blog: blog));
@@ -122,9 +122,10 @@ class _HomePageState extends State<HomePage> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
                                       child:
-                                          blog.imageUrl!.startsWith(
-                                            "/data/",
-                                          ) // cihaz cache yoluysa
+                                          blog.imageUrl != null &&
+                                              blog.imageUrl!.startsWith(
+                                                "/data/",
+                                              )
                                           ? Image.file(
                                               File(blog.imageUrl!),
                                               height: 180,
@@ -193,33 +194,85 @@ class _HomePageState extends State<HomePage> {
                                           blog.isLiked
                                               ? Icons.favorite
                                               : Icons.favorite_border,
-                                          color: Colors.pinkAccent,
+                                          color: blog.isLiked
+                                              ? Colors.pinkAccent
+                                              : Colors.grey[600],
                                         ),
                                         onPressed: () async {
-                                          final api = BlogApi();
-                                          bool success;
-                                          if (blog.isLiked) {
-                                            success = await api.unlikeBlog(
-                                              blog.id,
-                                            );
-                                            if (success) {
-                                              setState(() {
-                                                blog.isLiked = false;
-                                                blog.likesCount =
-                                                    (blog.likesCount ?? 1) - 1;
-                                              });
+                                          print(
+                                            '🎯 Like butonuna basıldı: Blog ${blog.id}',
+                                          );
+
+                                          // Optimistik güncelleme
+                                          final oldLiked = blog.isLiked;
+                                          final oldLikesCount = blog.likesCount;
+
+                                          setState(() {
+                                            if (blog.isLiked) {
+                                              // Unlike
+                                              blog.isLiked = false;
+                                              blog.likesCount = max(
+                                                0,
+                                                blog.likesCount - 1,
+                                              );
+                                            } else {
+                                              // Like
+                                              blog.isLiked = true;
+                                              blog.likesCount =
+                                                  blog.likesCount + 1;
                                             }
-                                          } else {
-                                            success = await api.likeBlog(
-                                              blog.id,
-                                            );
-                                            if (success) {
-                                              setState(() {
-                                                blog.isLiked = true;
-                                                blog.likesCount =
-                                                    (blog.likesCount ?? 0) + 1;
-                                              });
+                                          });
+
+                                          try {
+                                            final api = BlogApi();
+                                            bool success;
+
+                                            if (oldLiked) {
+                                              success = await api.unlikeBlog(
+                                                blog.id,
+                                              );
+                                            } else {
+                                              success = await api.likeBlog(
+                                                blog.id,
+                                              );
                                             }
+
+                                            if (!success) {
+                                              // İşlem başarısız olursa geri al
+                                              setState(() {
+                                                blog.isLiked = oldLiked;
+                                                blog.likesCount = oldLikesCount;
+                                              });
+
+                                              Get.snackbar(
+                                                'Hata',
+                                                'Beğeni işlemi başarısız',
+                                                backgroundColor: Colors.red,
+                                                colorText: Colors.white,
+                                              );
+                                            } else {
+                                              Get.snackbar(
+                                                'Başarılı',
+                                                blog.isLiked
+                                                    ? 'Beğenildi!'
+                                                    : 'Beğeni kaldırıldı',
+                                                backgroundColor: Colors.green,
+                                                colorText: Colors.white,
+                                              );
+                                            }
+                                          } catch (e) {
+                                            // Hata durumunda geri al
+                                            setState(() {
+                                              blog.isLiked = oldLiked;
+                                              blog.likesCount = oldLikesCount;
+                                            });
+
+                                            Get.snackbar(
+                                              'Hata',
+                                              'Beğeni işlemi sırasında hata: $e',
+                                              backgroundColor: Colors.red,
+                                              colorText: Colors.white,
+                                            );
                                           }
                                         },
                                       ),
@@ -492,55 +545,87 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                             blog.isLiked
                                 ? Icons.favorite
                                 : Icons.favorite_border,
-                            color: Colors.pinkAccent,
+                            color: blog.isLiked
+                                ? Colors.pinkAccent
+                                : Colors.grey[600],
                             size: 30,
                           ),
                           onPressed: () async {
-                            final api = BlogApi();
-                            bool success;
-                            if (blog.isLiked) {
-                              success = await api.unlikeBlog(blog.id);
-                              if (success) {
-                                setState(() {
-                                  blog.isLiked = false;
-                                  blog.likesCount -= 1;
-                                });
+                            print('🎯 Blog detay: Like butonuna basıldı');
+
+                            // Optimistik güncelleme
+                            final oldLiked = blog.isLiked;
+                            final oldLikesCount = blog.likesCount;
+
+                            setState(() {
+                              blog.isLiked = !blog.isLiked;
+                              blog.likesCount = blog.isLiked
+                                  ? blog.likesCount + 1
+                                  : max(0, blog.likesCount - 1);
+                            });
+
+                            try {
+                              final api = BlogApi();
+                              bool success;
+
+                              if (oldLiked) {
+                                success = await api.unlikeBlog(blog.id);
+                              } else {
+                                success = await api.likeBlog(blog.id);
                               }
-                            } else {
-                              success = await api.likeBlog(blog.id);
-                              if (success) {
+
+                              if (!success) {
+                                // İşlem başarısız olursa geri al
                                 setState(() {
-                                  blog.isLiked = true;
-                                  blog.likesCount += 1;
+                                  blog.isLiked = oldLiked;
+                                  blog.likesCount = oldLikesCount;
                                 });
+
+                                Get.snackbar(
+                                  'Hata',
+                                  'Beğeni işlemi başarısız',
+                                  backgroundColor: Colors.red,
+                                  colorText: Colors.white,
+                                );
+                              } else {
+                                // Başarılı - güncel blog detayını getir
+                                try {
+                                  final updatedBlog = await api.getBlogDetail(
+                                    blog.id,
+                                  );
+                                  setState(() {
+                                    blog.isLiked = updatedBlog.isLiked;
+                                    blog.likesCount = updatedBlog.likesCount;
+                                  });
+                                } catch (e) {
+                                  print('Blog detay yenileme hatası: $e');
+                                }
+
+                                Get.snackbar(
+                                  'Başarılı',
+                                  blog.isLiked
+                                      ? 'Beğenildi!'
+                                      : 'Beğeni kaldırıldı',
+                                  backgroundColor: Colors.green,
+                                  colorText: Colors.white,
+                                  duration: Duration(seconds: 2),
+                                );
                               }
+                            } catch (e) {
+                              // Hata durumunda geri al
+                              setState(() {
+                                blog.isLiked = oldLiked;
+                                blog.likesCount = oldLikesCount;
+                              });
+
+                              Get.snackbar(
+                                'Hata',
+                                'Beğeni işlemi sırasında hata: $e',
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
                             }
                           },
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "${blog.likesCount} Beğeni",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Yorumlar",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: _fetchComments,
                         ),
                       ],
                     ),
