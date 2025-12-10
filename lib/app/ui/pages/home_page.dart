@@ -374,7 +374,7 @@ class _HomePageState extends State<HomePage> {
               IconButton(
                 icon: const Icon(Icons.person_outline, color: Colors.grey),
                 onPressed: () {
-                  Get.toNamed(PROFILE);
+                  Get.toNamed(AppPages.PROFILE);
                 },
               ),
             ],
