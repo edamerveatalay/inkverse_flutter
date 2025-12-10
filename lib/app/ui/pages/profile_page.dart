@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inkverse_flutter/app/controllers/profile_controller.dart';
+import 'package:inkverse_flutter/app/routers/app_pages.dart';
 import 'package:inkverse_flutter/app/ui/widgets/custom_appbar.dart';
 import 'package:inkverse_flutter/app/ui/widgets/custom_shape.dart';
 
@@ -69,7 +70,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Get.toNamed("/edit-profile");
+                    Get.toNamed((AppPages.PROFILE_EDIT));
                   },
                   child: Text("Profili Düzenle"),
                 ),

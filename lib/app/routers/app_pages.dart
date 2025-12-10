@@ -3,6 +3,7 @@ import 'package:inkverse_flutter/app/ui/pages/drafts_edit_page.dart';
 import 'package:inkverse_flutter/app/ui/pages/drafts_page.dart';
 import 'package:inkverse_flutter/app/ui/pages/home_page.dart';
 import 'package:inkverse_flutter/app/ui/pages/login_page.dart';
+import 'package:inkverse_flutter/app/ui/pages/profile_edit_page.dart';
 import 'package:inkverse_flutter/app/ui/pages/profile_page.dart';
 import 'package:inkverse_flutter/app/ui/pages/signup_page.dart';
 import 'package:inkverse_flutter/app/ui/pages/splash_page.dart';
@@ -15,6 +16,7 @@ class AppPages {
   static const DRAFTS = '/drafts';
   static const DRAFTS_EDIT = '/drafts-edit';
   static const PROFILE = '/profile';
+  static const PROFILE_EDIT = '/profile-edit';
 
   static final routes = <GetPage>[
     GetPage(name: SPLASH, page: () => const SplashPage()),
@@ -27,5 +29,6 @@ class AppPages {
       page: () => DraftsEditPage(draft: Get.arguments),
     ),
     GetPage(name: PROFILE, page: () => ProfilePage()),
+    GetPage(name: PROFILE_EDIT, page: () => ProfileEditPage()),
   ];
 }
