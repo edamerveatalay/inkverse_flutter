@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:inkverse_flutter/app/bindings/profile_binding.dart';
 import 'package:inkverse_flutter/app/ui/pages/drafts_edit_page.dart';
 import 'package:inkverse_flutter/app/ui/pages/drafts_page.dart';
 import 'package:inkverse_flutter/app/ui/pages/home_page.dart';
@@ -28,7 +29,15 @@ class AppPages {
       name: AppPages.DRAFTS_EDIT,
       page: () => DraftsEditPage(draft: Get.arguments),
     ),
-    GetPage(name: PROFILE, page: () => ProfilePage()),
-    GetPage(name: PROFILE_EDIT, page: () => ProfileEditPage()),
+    GetPage(
+      name: PROFILE,
+      page: () => ProfilePage(),
+      binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: PROFILE_EDIT,
+      page: () => ProfileEditPage(),
+      binding: ProfileBinding(),
+    ),
   ];
 }
