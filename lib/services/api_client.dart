@@ -13,7 +13,7 @@ class ApiClient {
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       responseType: ResponseType.json,
-      followRedirects: true,
+      followRedirects: false,
       maxRedirects: 5,
     );
 
