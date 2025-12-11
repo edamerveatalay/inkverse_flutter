@@ -5,12 +5,12 @@ class ProfileApi {
   final ApiClient _apiClient = ApiClient();
 
   Future<Profile?> getProfile() async {
-    final response = await _apiClient.dio.get("/profile");
+    final response = await _apiClient.dio.get("/profile/");
     return Profile.fromJson(response.data);
   }
 
   Future<Profile?> updateProfile(Map<String, dynamic> data) async {
-    final response = await _apiClient.dio.put("/profile", data: data);
+    final response = await _apiClient.dio.put("/profile/", data: data);
     return Profile.fromJson(response.data);
   }
 }
