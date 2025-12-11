@@ -6,7 +6,7 @@ import 'package:inkverse_flutter/app/ui/widgets/custom_appbar.dart';
 import 'package:inkverse_flutter/app/ui/widgets/custom_shape.dart';
 
 class ProfilePage extends StatelessWidget {
-  final ProfileController controller = Get.put(ProfileController());
+  final ProfileController controller = Get.find<ProfileController>();
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,6 @@ class ProfilePage extends StatelessWidget {
 
                 SizedBox(height: 20),
 
-                // Profil Fotoğrafı
                 CircleAvatar(
                   radius: 55,
                   backgroundColor: Colors.white,
@@ -70,7 +69,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Get.toNamed((AppPages.PROFILE_EDIT));
+                    Get.toNamed(AppPages.PROFILE_EDIT);
                   },
                   child: Text("Profili Düzenle"),
                 ),
